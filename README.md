@@ -43,6 +43,11 @@ SharpMapExec.exe
 
 Can be used to scan for admin access and accessible Smb shares.
 
+Modules;
+````
+/m:shares                                  (Scan enumerated shares for access)
+````
+
 ### WinRm
 
 The beast. It has built-in Amsi bypass, JEA language breakout, JEA function analysis. Can be used for code execution, scaning for PsRemote access, vulnerable JEA endpoints, and data exfiltration.
@@ -100,16 +105,17 @@ Get-NetAdapter ethernet0* | Set-DnsClientServerAddress -ServerAddresses @('192.1
 
 ### Acknowledgments
 
-Projects that helped and are existing in this tool
+Projects that helped or are existing in this tool
 
-* [Rubeus](https://github.com/GhostPack/Rubeus)           [@Harmj0y](https://twitter.com/harmj0y)
+* [Rubeus](https://github.com/GhostPack/Rubeus)                [@Harmj0y](https://twitter.com/harmj0y)
 
-* [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI)   [@Harmj0y](https://twitter.com/harmj0y)
+* [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI)        [@Harmj0y](https://twitter.com/harmj0y)
 
-* [SharpKatz](https://github.com/b4rtik/SharpKatz)      [@b4rtik](https://twitter.com/b4rtik)
+* [SharpKatz](https://github.com/b4rtik/SharpKatz)             [@b4rtik](https://twitter.com/b4rtik)
 
-* [Amsi.Fail](https://github.com/Flangvik/AMSI.fail)        [@Flangvik](https://twitter.com/Flangvik)
+* [Amsi.Fail](https://github.com/Flangvik/AMSI.fail)           [@Flangvik](https://twitter.com/Flangvik)
 
 * [SharpSecDump](https://github.com/G0ldenGunSec/SharpSecDump) [@G0ldenGunSec](https://twitter.com/G0ldenGunSec)
 
+* [CrackMapExec](https://github.com/byt3bl33d3r/CrackMapExec)  [@byt3bl33d3r](https://twitter.com/byt3bl33d3r)
   
