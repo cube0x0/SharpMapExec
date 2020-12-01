@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props" Condition="Exists('..\packages\Costura.Fody.4.1.0\build\Costura.Fody.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BD5220F7-E1FB-41D2-91EC-E4C50C6E9B9F}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>SharpMapExec</RootNamespace>
+    <AssemblyName>SharpMapExec</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Dynamic, Version=1.3.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.3.0\lib\net45\Microsoft.Dynamic.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting, Version=1.3.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.3.0\lib\net45\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting.Metadata, Version=1.3.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicLanguageRuntime.1.3.0\lib\net45\Microsoft.Scripting.Metadata.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.PowerShell.5.ReferenceAssemblies.1.1.0\lib\net4\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Args\ArgumentParser.cs" />
+    <Compile Include="Args\ArgumentParserResult.cs" />
+    <Compile Include="Args\CommandCollection.cs" />
+    <Compile Include="Args\Info.cs" />
+    <Compile Include="Commands\Class1.cs" />
+    <Compile Include="Commands\KerberosTgtdeleg.cs" />
+    <Compile Include="Commands\ICommand.cs" />
+    <Compile Include="Commands\kerberosSmb.cs" />
+    <Compile Include="Commands\KerberosSpray.cs" />
+    <Compile Include="Commands\kerberosWinrm.cs" />
+    <Compile Include="Commands\NtlmSmb.cs" />
+    <Compile Include="Commands\NtlmWinrm.cs" />
+    <Compile Include="Helpers\AmsiFail.cs" />
+    <Compile Include="Helpers\Misc.cs" />
+    <Compile Include="Helpers\PsFunction.cs" />
+    <Compile Include="Helpers\Tasks.cs" />
+    <Compile Include="Helpers\Impersonator.cs" />
+    <Compile Include="Helpers\Jea.cs" />
+    <Compile Include="HiveParser\Crypto.cs" />
+    <Compile Include="HiveParser\LsaSecret.cs" />
+    <Compile Include="HiveParser\NL_Record.cs" />
+    <Compile Include="HiveParser\NodeKey.cs" />
+    <Compile Include="HiveParser\Registry.cs" />
+    <Compile Include="HiveParser\RegistryHive.cs" />
+    <Compile Include="HiveParser\ValueKey.cs" />
+    <Compile Include="Lib\KerberosSmb.cs" />
+    <Compile Include="Lib\KerberosWinrm.cs" />
+    <Compile Include="Lib\NtlmSmb.cs" />
+    <Compile Include="Lib\NtlmWinrm.cs" />
+    <Compile Include="Lib\Secrets.cs" />
+    <Compile Include="Lib\Smb.cs" />
+    <Compile Include="Lib\Wsman.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rubeus\Asn1\Asn1Extensions.cs" />
+    <Compile Include="Rubeus\Asn1\AsnElt.cs" />
+    <Compile Include="Rubeus\Asn1\AsnException.cs" />
+    <Compile Include="Rubeus\Asn1\AsnIO.cs" />
+    <Compile Include="Rubeus\Asn1\AsnOID.cs" />
+    <Compile Include="Rubeus\lib\Ask.cs" />
+    <Compile Include="Rubeus\lib\Bruteforcer.cs" />
+    <Compile Include="Rubeus\lib\ConsoleTable.cs" />
+    <Compile Include="Rubeus\lib\Crypto.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\DiffieHellmanKey.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\IExchangeKey.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\IKeyAgreement.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\KeyAgreementAlgorithm.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\ManagedDiffieHellman.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\ManagedDiffieHellmanOakley14.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\ManagedDiffieHellmanOakley2.cs" />
+    <Compile Include="Rubeus\lib\crypto\dh\Oakley.cs" />
+    <Compile Include="Rubeus\lib\crypto\SafeNativeMethods.cs" />
+    <Compile Include="Rubeus\lib\Helpers.cs" />
+    <Compile Include="Rubeus\lib\Interop.cs" />
+    <Compile Include="Rubeus\lib\Interop\Luid.cs" />
+    <Compile Include="Rubeus\lib\Interop\NtException.cs" />
+    <Compile Include="Rubeus\lib\KDCKeyAgreement.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\AP_REQ.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\AS_REP.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\AS_REQ.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\Authenticator.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\AuthorizationData.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\Checksum.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\EncKDCRepPart.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\EncKrbCredPart.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\EncKrbPrivPart.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\EncryptedData.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\EncryptionKey.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\HostAddress.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KDC_REQ_BODY.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KERB_AD_RESTRICTION_ENTRY.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KERB_PA_PAC_REQUEST.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KrbAlgorithmIdentifier.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KrbAuthPack.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KrbCredInfo.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KrbDHRepInfo.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KrbKDCDHKeyInfo.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KrbPkAuthenticator.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KrbSubjectPublicKeyInfo.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KRB_CRED.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KRB_ERROR.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\KRB_PRIV.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\LastReq.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PA_DATA.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PA_ENC_TS_ENC.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PA_FOR_USER.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PA_PAC_OPTIONS.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PA_PK_AS_REP.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PA_PK_AS_REQ.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PA_S4U_X509_USER.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\PrincipalName.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\S4UUserID.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\TGS_REP.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\TGS_REQ.cs" />
+    <Compile Include="Rubeus\lib\krb_structures\Ticket.cs" />
+    <Compile Include="Rubeus\lib\LSA.cs" />
+    <Compile Include="Rubeus\lib\math\BigInteger.cs" />
+    <Compile Include="Rubeus\lib\math\ConfidenceFactor.cs" />
+    <Compile Include="Rubeus\lib\math\NextPrimeFinder.cs" />
+    <Compile Include="Rubeus\lib\math\PrimalityTest.cs" />
+    <Compile Include="Rubeus\lib\math\PrimeGeneratorBase.cs" />
+    <Compile Include="Rubeus\lib\math\SequentialSearchPrimeGeneratorBase.cs" />
+    <Compile Include="Rubeus\lib\Networking.cs" />
+    <Compile Include="SharpDPAPI\lib\BigInteger.cs" />
+    <Compile Include="SharpDPAPI\lib\Crypto.cs" />
+    <Compile Include="SharpDPAPI\lib\Dpapi.cs" />
+    <Compile Include="SharpDPAPI\lib\Helpers.cs" />
+    <Compile Include="SharpDPAPI\lib\Interop.cs" />
+    <Compile Include="SharpDPAPI\lib\PBKDF2.cs" />
+    <Compile Include="SharpDPAPI\lib\Triage.cs" />
+    <Compile Include="SharpDPAPI\lib\Tuple.cs" />
+    <Compile Include="SharpDPAPI\SharpDPAPI.cs" />
+    <Compile Include="SharpKatz\Credential\Credential.cs" />
+    <Compile Include="SharpKatz\Crypto\BCrypt.cs" />
+    <Compile Include="SharpKatz\Keys.cs" />
+    <Compile Include="SharpKatz\Module\Kerberos.cs" />
+    <Compile Include="SharpKatz\Module\LogonSessions.cs" />
+    <Compile Include="SharpKatz\Module\Msv1.cs" />
+    <Compile Include="SharpKatz\Module\Ptp.cs" />
+    <Compile Include="SharpKatz\Module\Pth.cs" />
+    <Compile Include="SharpKatz\Module\Tspkg.cs" />
+    <Compile Include="SharpKatz\OSVersionHelper.cs" />
+    <Compile Include="Helpers\SecurityContext.cs" />
+    <Compile Include="SharpKatz\Utility.cs" />
+    <Compile Include="SharpKatz\Win32\CustomLoadLibrary.cs" />
+    <Compile Include="SharpKatz\Win32\Natives.cs" />
+    <Compile Include="SharpKatz\Win32\Syscall.cs" />
+    <Compile Include="SharpKatz\WinBuild\IWinBuild.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild1507.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild1511.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild1607.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild1703.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild1803.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild1809.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild1903.cs" />
+    <Compile Include="SharpKatz\WinBuild\WinBuild2004.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Helpers\JeaRules.ps1" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
