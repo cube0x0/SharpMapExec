@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -107,10 +107,16 @@ namespace SharpMapExec.Lib
                 }
                 catch
                 {
-                    if (!errors.Contains("C$"))
+                    SHARE_INFO_1[] computerShares = EnumNetShares(computer);
+                    foreach (SHARE_INFO_1 share in computerShares)
                     {
-                        Console.WriteLine(String.Format("  [+] Authenticated but not admin on {0}", computer));
+                        if (share.shi1_netname.Contains("ERROR"))
+                        {
+                            Console.WriteLine(String.Format("  [-] Failed to authenticate on {0}", computer));
+                            return;
+                        }
                     }
+                    Console.WriteLine(String.Format("  [+] Authenticated but not admin on {0}", computer));
                 }
             }
             else
