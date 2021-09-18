@@ -107,15 +107,10 @@ Get-NetAdapter ethernet0* | Set-DnsClientServerAddress -ServerAddresses @('192.1
 
 Projects that helped or are existing in this tool
 
-* [Rubeus](https://github.com/GhostPack/Rubeus)                [@Harmj0y](https://twitter.com/harmj0y)
-
-* [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI)        [@Harmj0y](https://twitter.com/harmj0y)
-
-* [SharpKatz](https://github.com/b4rtik/SharpKatz)             [@b4rtik](https://twitter.com/b4rtik)
-
+* [Rubeus](https://github.com/GhostPack/Rubeus)              [@Harmj0y](https://twitter.com/harmj0y)
+* [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI)      [@Harmj0y](https://twitter.com/harmj0y)
+* [SharpKatz](https://github.com/b4rtik/SharpKatz)         [@b4rtik](https://twitter.com/b4rtik)
 * [Amsi.Fail](https://github.com/Flangvik/AMSI.fail)           [@Flangvik](https://twitter.com/Flangvik)
-
 * [SharpSecDump](https://github.com/G0ldenGunSec/SharpSecDump) [@G0ldenGunSec](https://twitter.com/G0ldenGunSec)
-
 * [CrackMapExec](https://github.com/byt3bl33d3r/CrackMapExec)  [@byt3bl33d3r](https://twitter.com/byt3bl33d3r)
-  
+* [Pingcastle ](https://github.com/vletoux/pingcastle)         [@mysmartlogon](https://twitter.com/mysmartlogon)

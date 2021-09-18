@@ -80,6 +80,8 @@ namespace SharpMapExec.Lib
                                 {
                                     Directory.CreateDirectory(Path.Combine("loot", computername));
                                 }
+                                Smb.CheckSMBVersion(computername);
+                                Smb.CheckOsVersion(computername);
                                 Smb.CheckLocalAdmin(computername, module);
                                 Console.WriteLine("");
                             }
