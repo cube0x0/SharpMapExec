@@ -1,0 +1,599 @@
+﻿<html DIR="LTR" xmlns:tool="http://www.microsoft.com/tooltip" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ddue="http://ddue.schemas.microsoft.com/authoring/2003/5" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+  <head>
+    <META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=utf-8" />
+    <META NAME="save" CONTENT="history" />
+    <META NAME="DCSext.Title" CONTENT="Microsoft Exchange Web Services Managed API 2.2 Readme" />
+    <title>Microsoft Exchange Web Services Managed API 2.2 Readme</title>
+    
+ <Style TYPE="text/css">
+
+body
+{
+    background: #FFFFFF;
+    color: #000000;
+    font-family:    Verdana;
+    font-size: medium;
+    font-style: normal;
+    font-weight: normal;
+    margin-top: 0;
+    margin-bottom:  0;
+    margin-left:    0;
+    margin-right:   0;
+    width:  100%;
+}
+
+div.#mainSection
+{
+    font-size: 70%;
+    width: 100%;
+    padding-left:    10;
+    margin-right: 10;
+}
+
+div.#mainBody
+{
+    font-size: 90%;
+    margin-top: 10;
+    padding-bottom: 20;
+}
+
+div.#header
+{
+    background-color: #D2D2D2;
+    padding-top:    0;
+    padding-bottom: 0;
+    padding-left:   10;
+    padding-right:  0;
+    width:          100%;
+}
+
+div.#header table
+{
+    border-bottom-color: #C8CDDE;
+    border-bottom-style: solid;
+    border-bottom-width: 1;
+    width:  100%;
+}
+
+span.#runningHeaderText
+{
+    color: #003399;
+    font-size: 90%;
+}
+
+span.#nsrTitle
+{
+/*    color: #003399;*/
+    font-size: 120%;
+    font-weight: 600;
+}
+
+div.#header table td
+{
+    color: #000000;
+    font-size: 70%;
+    margin-top: 0;
+    margin-bottom:  0;
+    padding-right: 20;
+}
+
+div.#header table tr.#headerTableRow3 td
+{
+    padding-bottom: 2;
+    padding-top: 5;
+}
+
+div.#header table.#bottomTable
+{
+    border-top-color: #FFFFFF;
+    border-top-style: solid;
+    border-top-width: 1;
+    text-align: left;
+}
+
+div.#footer
+{
+    font-size: 90%;
+    margin-top: 0;
+    margin-bottom:  0;
+    margin-left:    -5;
+    margin-right:   0;
+    padding-top:    2;
+    padding-bottom: 2;
+    padding-left:   0;
+    padding-right:  0;
+    width:  100%;
+}
+
+hr.#footerHR
+{
+    border-bottom-color: #EEEEFF;
+    border-bottom-style: solid;
+    border-bottom-width: 1;
+    border-top-color: C8CDDE;
+    border-top-style: solid;
+    border-top-width: 1;
+    height: 3;
+    color: #D2D2D2;
+}
+
+div.section
+{
+    padding-top:    2;
+    padding-bottom: 2;
+    padding-right:  15;
+    width:  100%;
+}
+
+.heading
+{
+    color:          #000000;
+    font-weight:    bold;
+    margin-top:     18;
+    margin-bottom:  8;
+}
+
+h1.heading
+{
+    color: #000000;
+    font-size:  150%;
+}
+
+.subHeading
+{
+    color:          #000000;
+    font-weight:    bold;
+    font-size:      150%;
+    margin-bottom:  4;
+}
+
+h2.subHeading
+{
+    color:          #000000;
+    font-weight:    bold;
+    font-size:      130%;
+}
+h3.subHeading
+{
+    color:  #000000;
+    font-size: 125%;
+    font-weight: bold;
+}
+
+h4.subHeading
+{
+    color: #000000;
+    font-size: 110%;
+    font-weight: bold;
+}
+
+h4.procedureHeading
+{
+    color: #000080;
+    font-size: 110%;
+    font-weight: bold;
+}
+
+h5.subHeading
+{
+    color: #000000;
+    font-size: 100%;
+    font-weight: bold;
+}
+
+img
+{
+    padding-bottom: 10;
+}
+
+img.toggle
+{
+    border: 0;
+    margin-right: 5;
+    padding-bottom: 10;
+}
+
+img.copyCodeImage
+{
+    border: 0;
+    margin: 1;
+    margin-right: 3;
+    padding-bottom: 10;
+}
+
+img.downloadCodeImage
+{
+    border: 0;
+    margin-right: 3;
+    padding-bottom: 10;
+}
+
+img.viewCodeImage
+{
+    border: 0;
+    margin-right: 3;
+    padding-bottom: 10;
+}
+
+img.note
+{
+    border: 0;
+    margin-right: 3;
+    padding-bottom: 10;
+}
+
+img.#membersOptionsFilterImage
+{
+    border: 0;
+    margin-left: 10;
+    vertical-align: middle;
+    padding-bottom: 10;
+}
+
+img.#toggleAllImage
+{
+    margin-left: 4;
+    vertical-align: middle;
+    padding-bottom: 10;
+}
+
+div.#mainSection table
+{
+    border: 0;
+    font-size: 100%;
+    width:  100%;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+div.#mainSection table tr
+{
+    vertical-align: top;
+}
+
+div.#mainSection table th
+{
+    text-align: left;
+    background: #D8D8D8;
+    border-bottom-color: #D8D8D8;
+    border-bottom-style: solid;
+    border-bottom-width: 1;
+    color: #000000;
+    padding-left: 5;
+    padding-right: 5;
+}
+
+div.#mainSection table td
+{
+    background: #F2F2F2;
+    border-top-color: #D8D8D8;
+    border-top-style: solid;
+    border-top-width: 1;
+    padding-left: 5;
+    padding-right: 5;
+}
+
+div.#mainSection table td.imageCell
+{
+    white-space: nowrap;
+}
+
+div.code
+{
+	width: 98%;
+}
+
+div.code table
+{
+    border: 0;
+    font-size: 95%;
+    margin-bottom: 5;
+    width: 100%
+}
+
+div.code table th
+{   
+    text-align: left;
+    background: #D8D8D8;
+    border-bottom-color: #D8D8D8;
+    border-bottom-style: solid;
+    border-bottom-width: 1;
+    color: #000000;
+    font-weight: bold;
+    padding-left: 5;
+    padding-right: 5;
+}
+
+div.code table td
+{
+    background: #CCCCCC;
+    border-top-color: #D8D8D8;
+    border-top-style: solid;
+    border-top-width: 1;
+    padding-left: 5;
+    padding-right: 5;
+    padding-top: 5;
+}
+
+div.alert
+{
+	margin-left: 10;
+	width: 98%;
+}
+
+div.alert table
+{
+    border: 1;
+    font-size: 100%;
+    width:  100%;
+    border: solid 1 #DEDFEF;
+}
+
+div.alert table th
+{
+    text-align: left;
+    background: #D8D8D8;
+    border-bottom-width: 0;
+    color: #000000;
+    padding-left: 5;
+    padding-right: 5;
+    border: solid 1 #DEDFEF;
+}
+
+div.alert table td
+{
+    background: #FFFFFF;
+    border-top-color: #D8D8D8;
+    border-top-style: solid;
+    border-top-width: 1;
+    padding-left: 5;
+    padding-right: 5;
+    border: solid 1 #DEDFEF;
+}
+
+span.copyCode
+{
+    color: #0000ff;
+    font-size: 90%;
+    font-weight: normal;
+    cursor: hand;
+    float: right;
+    display: inline;
+    text-align: right;
+}
+
+.downloadCode
+{
+    color: #0000ff;
+    font-size: 90%;
+    font-weight: normal;
+    cursor: hand;
+}
+
+.viewCode
+{
+    color: #0000ff;
+    font-size: 90%;
+    font-weight: normal;
+    cursor: hand;
+}
+
+div.code pre
+{
+    font-family:    Monospace, Courier New, Courier;
+    font-size: 105%;
+    color:  #000000;
+}
+
+code
+{
+    font-family:    Monospace, Courier New, Courier;
+    font-size: 105%;
+    color:  #000000;
+}
+
+dl
+{
+    margin-top: 0;
+    padding-left:   1;
+}
+
+dd
+{
+    margin-bottom:  0;
+    margin-left:    0;
+    padding-left:   20;
+}
+
+dd p
+{
+    margin-top: 5;
+}
+
+ul
+{
+    margin-left: 17;
+    list-style-type: disc;
+}
+
+ul ul
+{
+    margin-bottom: 4;
+    margin-left: 17;
+    margin-top: 3;
+    list-style-type: disc;
+}
+
+ol
+{
+    margin-left: 24;
+    list-style-type: decimal;
+}
+
+ol ol
+{
+    margin-left: 24;
+    margin-top: 3;
+    list-style-type: lower-alpha;
+}
+
+li
+{
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    padding-top: 0;
+    margin-left: 5;
+}
+
+p
+{
+    margin-bottom: 15;
+}
+
+.tip
+{
+    color:  #0000FF;
+    font-style: italic;
+    cursor:hand;
+    text-decoration:underline;
+}
+
+.math
+{
+    font-family: Times New Roman;
+    font-size: 125%
+}
+.sourceCodeList
+{
+    font-family: Verdana;
+    font-size: 90%; 
+}
+
+pre.viewCode
+{
+    width: 100%;
+    overflow: auto;
+}
+
+li:hover table, li.over table
+{
+    background-color: #C0C0C0;
+}
+
+li:hover ul, li.over ul
+{ 
+    background-color: #d2d2d2;
+    border: 1px solid #000;
+    display: block;
+}
+
+</style>
+  </head>
+  <body>
+    
+    <div id="header">
+      <table width="100%" id="topTable">
+        <tr>
+          <td align="left">
+            <span id="nsrTitle">Microsoft Exchange Web Services Managed API 2.2 Readme</span>
+          </td>
+          <td align="right">
+            <span id="headfb" class="feedbackhead">
+            </span>
+          </td>
+        </tr>
+        <tr id="headerTableRow3">
+          <td />
+          <td align="right">
+          </td>
+        </tr>
+      </table>
+      </div>
+    <div id="mainSection">
+      <div id="mainBody">
+
+        <font color="DarkGray"></font><p />
+        <span id="changeHistory"></span>
+        <p>
+        <!-- DocStudio metadata -->
+        <i><b>Topic Last Modified: </b>2014-01-23</i><br/>
+	</p>
+    <p>© 2014 Microsoft Corporation, All Rights Reserved.</p>
+    <p>The Exchange Web Services (EWS) Managed API 2.2 provides a .NET Framework interface to EWS in Exchange Online, Exchange Online as part of Office 365, and versions of Exchange starting with Exchange Server 2007 Service Pack 1 (SP1). You can use this version of the EWS Managed API to evaluate the library for your application needs, to compare it to directly using XML or the auto generated proxy library, and to create production-ready applications.</p>
+    <p>This Readme provides information about how to provide comments and get support, information about installation prerequisites, and information about how to install and remove the EWS Managed API assembly and related documents. </p>
+	
+  <h1 class="heading" expandcollapse="expand">Learning more</h1><div id="sectionSection0" class="section" style=""><content xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+      <p xmlns="">The <a href="http://msdn.microsoft.com/EN-US/library/dn567668(v=exchg.150).aspx"><b>Get started with EWS Managed API client applications</b></a> article helps you makeshows you how to create a Hello World application by using the EWS Managed API.</p>
+	  
+      <p xmlns="">For online documentation for this release, see <a href="http://msdn.microsoft.com/en-us/library/dd877012(v=exchg.150).aspx"><b>Web services in Exchange</b></a>. This documentation contains sample code and other information to help you use the EWS Managed API.</p>
+	  
+      <p xmlns="">The <a href="http://www.microsoft.com/exchange/en-us/default.aspx"><b>Exchange website</b></a> provides product information for Exchange.</p>
+	  
+      <p xmlns="">The <a href="http://msdn.microsoft.com/en-US/office/dn448484"><b>Exchange Dev Center on MSDN</b></a> includes developer information and links to Exchange-related resources.</p>
+	  
+      <p xmlns="">The <a href="http://technet.microsoft.com/en-us/exchange/default.aspx"><b>Exchange TechCenter</b></a> is your one-stop source for Exchange technical documentation for ITPros. </p>
+    </content></div>
+	
+	<h1 class="heading" expandcollapse="expand">Feedback</h1><div id="sectionSection1" class="section" style=""><content xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+      <p xmlns="">The Exchange team welcomes feedback about the EWS Managed API. You can submit feedback to the <a href="http://social.technet.microsoft.com/Forums/en-US/exchangesvrdevelopment/threads">Exchange Development Forum</a>. Feedback from our customers is an important part of our development process. Thank you for helping us to develop a better product.</p>
+    </content></div><h1 class="heading" expandcollapse="expand">Prerequisites</h1><div id="sectionSection2" class="section" style=""><content xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+      <p xmlns="">To use this version of the EWS Managed API, you must have the following installed on the computer where you build client applications:</p>
+      <ul xmlns=""><li>
+          Visual Studio .NET 2008 or a later version<br></br>
+        </li><li>
+          The .NET Framework 3.5 or a later version<br></br>
+        </li></ul>
+      <p xmlns="">If you will be running applications that use the EWS Managed API on a different computer, you must have the .NET Framework 3.5 installed on that computer. Most applications do not require Visual Studio to be installed on the client computer.</p>
+      <p xmlns="">The EWS Managed API can be used to access information hosted in Exchange Online or on computers that are running versions of Exchange starting with Exchange 2007 SP1.</p>
+
+      <p xmlns="">The Exchange server on which the Client Access server role is installed must have EWS enabled. If EWS is disabled, the EWS Managed API cannot communicate with the server.</p>
+    </content></div><h1 class="heading" expandcollapse="expand">Installing the EWS Managed API assembly</h1><div id="sectionSection3" class="section" style=""><content xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+      <procedure>
+        To install the EWS Managed API assembly
+<ol xmlns=""><li>
+              <p xmlns="">Download the EwsManagedApi.msi file and store it on your hard disk.</p>
+
+          </li><li>
+              <p xmlns="">Run the EwsManagedApi.msi file and follow the instructions in the installation wizard. You must accept the terms of the license agreement to install the software.</p>
+
+          </li></ol>
+      </procedure>
+      <p xmlns="">The following is the default installation path: C:\Program Files\Microsoft\Exchange\Web Services\2.2</p>
+    </content><sections xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+      <h3 class="subHeading" expandcollapse="expand" xmlns="">Files installed</h3><div class="subSection" xmlns=""><content xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+          <p xmlns="">The following files are installed by EwsManagedApi.msi:</p>
+          <ul xmlns=""><li>
+              
+                <b>Microsoft.Exchange.WebServices.dll</b>   The signed .NET assembly that implements the EWS Managed API.<br></br>
+            </li><li>
+              
+                <b>Microsoft.Exchange.WebServices.xml</b>   Provides a Visual Studio .NET IntelliSense file for the EWS Managed API.<br></br>
+            </li><li>
+              
+                <b>Microsoft.Exchange.WebServices.Auth.dll</b>   Provides an API to validate, parse and process Exchange Identity Tokens to be used by mail apps for Outlook.<br></br>
+            </li><li>
+              
+                <b>Microsoft.Exchange.WebServices.Auth.xml</b>   Provides a Visual Studio .NET IntelliSense file for the Auth library.<br></br>
+            </li><li>
+			
+                <b>GettingStarted.doc</b>   Provides additional help for and information about how to use the API.<br></br>
+            </li><li>
+              
+                <b>License Terms.rtf </b>  Contains the license terms for using the EWS Managed API and documentation.<br></br>
+            </li><li>
+              
+                <b>Readme.htm </b>  This file.<br></br>
+            </li><li>
+              
+                <b>Redist.txt </b>  Defines which files and directories can be redistributed under the license terms.<br></br>
+            </li></ul>
+        </content></div>
+    </sections></div><h1 class="heading" expandcollapse="expand">Removing the EWS Managed API assembly</h1><div id="sectionSection4" class="section" style=""><content xmlns="http://ddue.schemas.microsoft.com/authoring/2003/5">
+      <p xmlns="">To remove the EWS Managed API files from your computer, locate and run the EwsManagedApi.msi installer and select the <b>Remove</b> option.</p>
+    </content></div><!--[if gte IE 5]>
+			<tool:tip element="seeAlsoToolTip" avoidmouse="false"/><tool:tip element="languageFilterToolTip" avoidmouse="false"/><tool:tip element="roleInfoSpan" avoidmouse="false"/>
+		<![endif]--></div>
+    </div>
+  </body>
+</html>

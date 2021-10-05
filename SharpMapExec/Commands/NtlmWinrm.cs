@@ -59,6 +59,10 @@ namespace SharpMapExec.Commands
             {
                 flags.Add("system");
             }
+            if (arguments.ContainsKey("/asdelegwalk") || arguments.ContainsKey("/delegwalk"))
+            {
+                flags.Add("delegwalk");
+            }
 
             if (arguments.ContainsKey("/domain"))
             {

@@ -9,6 +9,27 @@ namespace SharpMapExec.Helpers
 {
     internal class Misc
     {
+        public static string Compress(byte[] data)
+        {
+            using (var compressedStream = new MemoryStream())
+            using (var zipStream = new GZipStream(compressedStream, CompressionMode.Compress))
+            {
+                zipStream.Write(data, 0, data.Length);
+                zipStream.Close();
+                return Convert.ToBase64String(compressedStream.ToArray());
+            }
+        }
+
+        public static byte[] Decompress(byte[] data)
+        {
+            using (var compressedStream = new MemoryStream(data))
+            using (var zipStream = new GZipStream(compressedStream, CompressionMode.Decompress))
+            using (var resultStream = new MemoryStream())
+            {
+                zipStream.CopyTo(resultStream);
+                return resultStream.ToArray();
+            }
+        }
         public static bool CheckHostPort(string hostname, int port, int PortScanTimeout = 2000)
         {
             using (var client = new TcpClient())

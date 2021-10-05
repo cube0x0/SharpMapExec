@@ -58,6 +58,14 @@ namespace SharpMapExec.Commands
             {
                 moduleargument = arguments["/argument"];
             }
+            if (arguments.ContainsKey("/assystem") || arguments.ContainsKey("/system"))
+            {
+                flags.Add("system");
+            }
+            if (arguments.ContainsKey("/asdelegwalk") || arguments.ContainsKey("/delegwalk"))
+            {
+                flags.Add("delegwalk");
+            }
 
             if (arguments.ContainsKey("/user"))
             {

@@ -1,0 +1,1160 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Microsoft.Exchange.WebServices.Auth</name>
+    </assembly>
+    <members>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager">
+            <summary>
+            Exchange Resource Manager.
+            </summary>
+            <remarks>
+            The Exchange Resource Manager gives us access to the assembly name.
+            This allows the LocalizedString to try to reconstruct a "serialized"
+            resource manager in the client side. If the client does not have
+            the corresponding assembly, the resource manager will not be constructed,
+            of course. See the description in LocalizedString for more details.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.resourceManagers">
+            <summary>
+            Dictionary of resource managers. Initialized only if someone uses resources in the process.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.lockObject">
+            <summary>
+            lock object used when accessing ResourceManager
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.#ctor(System.String,System.Reflection.Assembly)">
+            <summary>
+            Initializes a new instance of the ExchangeResourceManager class
+            </summary>
+            <param name="baseName">The root name of the resources.</param>
+            <param name="assembly">The main Assembly for the resources.</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.GetResourceManager(System.String,System.Reflection.Assembly)">
+            <summary>
+            Returns the instance of the ExchangeResourceManager class that looks up 
+            resources contained in files derived from the specified root name using the given Assembly.
+            <see cref="T:System.Resources.ResourceManager"/>
+            </summary>
+            <param name="baseName">The root name of the resources.</param>
+            <param name="assembly">The main Assembly for the resources.</param>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="assembly"/> is null.
+            </exception>
+            <returns>An instance of ExchangeResourceManager</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.GetString(System.String)">
+            <summary>
+            Retrieves a string from the resource table based on a string id.
+            Asserts if the string cannot be found.
+            </summary>
+            <param name="name">Id of the string to retrieve.</param>
+            <returns>The corresponding string if the id was located in the table, null otherwise.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.GetString(System.String,System.Globalization.CultureInfo)">
+            <summary>
+            Retrieves a string from the resource table based on a string id.
+            Asserts if the string cannot be found.
+            </summary>
+            <param name="name">Id of the string to retrieve.</param>
+            <param name="culture">The culture to use.</param>
+            <returns>The corresponding string if the id was located in the table, null otherwise.</returns>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.BaseName">
+            <summary>
+            Base Name for the resources
+            </summary>
+            <remarks>
+            Used by LocalizedString to serialize localized strings.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager.AssemblyName">
+            <summary>
+            Gets the assembly name
+            </summary>
+            <remarks>
+            Used by LocalizedString to serialize localized strings.
+            </remarks>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.ILocalizedString">
+            <summary>
+            Interface implemented by objects that provide a LocalizedString.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.ILocalizedString.LocalizedString">
+            <summary>
+            Gets the LocalizedString held by this object.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.LocalizedString">
+            <summary>
+            Struct that defines a localized string.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.LocalizedString.Empty">
+            <summary>
+            The one and only LocalizedString.Empty.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.LocalizedString.Id">
+            <summary>
+            The id of the localized string.
+            </summary>
+            <remarks>
+            If we don't have a ResourceManager, this is
+            the formating string we'll use in ToString().
+            This can happen if we serialize the object and
+            we are unable to reload the resource manager
+            when deserializing.
+            </remarks>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.LocalizedString.Inserts">
+            <summary>
+            Strings to be inserted in the message identified by Id.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.LocalizedString.ResourceManager">
+            <summary>
+            Resource Manager capable of loading the string.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.#ctor(System.String,Microsoft.Exchange.WebServices.Auth.ExchangeResourceManager,System.Object[])">
+            <summary>
+            Initializes a new instance of the LocalizedString struct.
+            </summary>
+            <param name="id">The id of the localized string.</param>
+            <param name="resourceManager">Resource Manager capable of loading the string.</param>
+            <param name="inserts">Strings to be inserted in the message identified by Id.</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the LocalizedString struct.
+            Encapsulates a string in a LocalizedString.
+            </summary>
+            <remarks>
+            While the rule of thumb says that an implicit conversion
+            can be used when there's no loss of data, this is not the case 
+            with this constructor. When going from string to LocalizedString
+            we don't lose information but we don't gain information
+            either. The usage pattern of LocalizedString asks that
+            if a string is to be localizable it should always be
+            transported around in a LocalizedString. If you are setting
+            a LocalizedString from a string it is most likely
+            that you lost data already, somewhere else. To flag this
+            problem, instead of an implicit conversion we have a constructor
+            to remind people that this is not your ideal situation. This way 
+            we can also search for "new LocalizedString" in the code and 
+            see where we're doing this and come up with a design where
+            we will not lose the localization information until it's
+            time to show the string to the user.
+            Ideally, we would be able to remove all instances where we
+            need this constructor, but then people would just create a 
+            localized string "{0}", which would give us just about the 
+            same thing with less perf.
+            </remarks>
+            <param name="value">
+            String to encapsulate.
+            Note that if value is null this creates a copy of 
+            LocalizedString.Empty and ToString will return "", not null.
+            This is intentional to avoid returning null from ToString().
+            </param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.#ctor(System.String,System.Object[])">
+            <summary>
+            Initializes a new instance of the LocalizedString struct.
+            Encapsulates a hardcoded formatting string and 
+            its parameters as a LocalizedString.
+            </summary>
+            <param name="format">Formatting string.</param>
+            <param name="inserts">Insert parameters.</param>
+            <remarks>
+            The formatting string is localized "as-is".
+            This is used to append strings and other things like that.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the LocalizedString struct.
+            Serialization-required constructor 
+            </summary>
+            <param name="info">Holds the serialized object data about the exception being thrown.</param>
+            <param name="context">Contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.op_Equality(Microsoft.Exchange.WebServices.Auth.LocalizedString,Microsoft.Exchange.WebServices.Auth.LocalizedString)">
+            <summary>
+            Compares both strings.
+            </summary>
+            <param name="s1">First string.</param>
+            <param name="s2">Second string.</param>
+            <returns>True if objects are equal.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.op_Inequality(Microsoft.Exchange.WebServices.Auth.LocalizedString,Microsoft.Exchange.WebServices.Auth.LocalizedString)">
+            <summary>
+            Compares both strings.
+            </summary>
+            <param name="s1">First string.</param>
+            <param name="s2">Second string.</param>
+            <returns>True if objects are not equal.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.op_Implicit(Microsoft.Exchange.WebServices.Auth.LocalizedString)~System.String">
+            <summary>
+            Implicit conversion from a LocalizedString to a string.
+            </summary>
+            <param name="value">LocalizedString value to convert to a string.</param>
+            <returns>The string localized in the CurrentCulture.</returns>
+            <remarks>
+            While the rule of thumb says that an implicit conversion
+            should not loose data, this operator is an exception.
+            The moment a LocalizedString becomes a string, we lose
+            the localization information and we end up with the
+            localized string in the current culture - from there
+            we cannot go back to a fully localizable string.
+            We allow that because the usage pattern of LocalizedString
+            is so that by the time we convert a LocalizedString to
+            a string we are about to show the string to the client.
+            Most certainly we'll never import that string back
+            into a LocalizedString again, so it really does not matter
+            that we're loosing the information.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.Join(System.Object,System.Object[])">
+            <summary>
+            Joins objects in a localized string.
+            </summary>
+            <param name="separator">Separator between strings.</param>
+            <param name="value">Array of objects to join as strings.</param>
+            <returns>
+            A LocalizedString that concatenates the given objects.
+            </returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.System#Runtime#Serialization#ISerializable#GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Called when the object is serialized. 
+            </summary>
+            <remarks>
+            When serializing the insert parameters we will replace any non-serializable object
+            with its ToString() version or its ILocalizedString.LocalizedString property.
+            </remarks>
+            <param name="info">Holds the serialized object data about the exception being thrown.</param>
+            <param name="context">Contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.ToString">
+            <summary>
+            Returns the string localized in the current UI culture.
+            </summary>
+            <returns>The localized string.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.ToString(System.IFormatProvider)">
+            <summary>
+            Returns the string localized in the given culture.
+            </summary>
+            <param name="formatProvider">
+            The <see cref="T:System.IFormatProvider"/> to use to format the value or
+            a <see langword="null"/> reference to obtain the format information 
+            from the current UI culture. This parameter is usually a 
+            <see cref="T:System.Globalization.CultureInfo"/> object.
+            </param>
+            <returns>The localized string.</returns>
+            <remarks>
+            Note that neutral cultures are unable to format
+            strings that contain numeric or date/time insertion parameters.
+            </remarks>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.System#IFormattable#ToString(System.String,System.IFormatProvider)">
+            <summary>
+            Returns the string localized in the given culture.
+            </summary>
+            <param name="format">
+            The <see cref="T:System.String"/> specifying the format to use or 
+            a <see langword="null"/> reference to use the default format 
+            defined for the type of the <see cref="T:System.IFormattable"/> implementation. 
+            This parameter is currently ignored.
+            </param>
+            <param name="formatProvider">
+            The <see cref="T:System.IFormatProvider"/> to use to format the value or
+            a <see langword="null"/> reference to obtain the format information 
+            from the current UI culture. 
+            If this parameter is a <see cref="T:System.Globalization.CultureInfo"/> the resulting
+            string will be localized in the given culture otherwise the
+            current UI culture will be used to load the string from the
+            resource file.
+            </param>
+            <returns>The string localized in the given culture.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.GetHashCode">
+            <summary>
+            Returns a hash code based on the hash of the resource manager and the hash of the ID.
+            </summary>
+            <returns>Hash code of object.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.Equals(System.Object)">
+            <summary>
+            Compares this string with another.
+            </summary>
+            <param name="obj">Object to compare</param>
+            <returns>Returns true if objects are equal.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.Equals(Microsoft.Exchange.WebServices.Auth.LocalizedString)">
+            <summary>
+            Compares this string with another.
+            </summary>
+            <param name="obj">Object to compare.</param>
+            <returns>True if LocalizedString objects are equal.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.LocalizedString.TranslateObject(System.Object,System.IFormatProvider)">
+            <summary>
+            Given an object that is not good for serialization or that
+            returns an awful string in its ToString() this function
+            will return one that we consider better for the user.
+            </summary>
+            <param name="badObject">Object that cannot be serialized</param>
+            <param name="formatProvider">FormatProvider to use</param>
+            <returns>A string or LocalizedString to represent the object.</returns>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.LocalizedString.Microsoft#Exchange#WebServices#Auth#ILocalizedString#LocalizedString">
+            <summary>
+            Gets the object itself.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.LocalizedString.IsEmpty">
+            <summary>
+            Gets a value indicating whether the string is empty.
+            </summary>
+            <remarks>
+            This is slighly faster than comparing the string against LocalizedString.Empty.
+            </remarks>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.LocalizedString.BaseId">
+            <summary>
+            Gets a numeric Id identifying the localized string template without taking the inserts into consideration.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.AuthToken">
+            <summary>
+            Definition for AuthToken
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.AuthToken.Parse(System.String)">
+            <summary>
+            static method for parsing a token for validation
+            </summary>
+            <param name="token">token as string</param>
+            <returns>a instance of the Base64EncodedTokenParser</returns>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder">
+            <summary>
+            Definition of the Base64EncodedTokenDecoder class
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.ITokenDecoder">
+            <summary>
+            Definition for the ITokenDecoder Interface
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.ITokenDecoder.RawToken">
+            <summary>
+            Gets a string containing the original token in raw form.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.ITokenDecoder.ExchangeUserId">
+            <summary>
+            Gets the Unique Exchange UserId value listed in the token
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.ITokenDecoder.Version">
+            <summary>
+            Gets the appctx.version of the token
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.ITokenDecoder.Thumbprint">
+            <summary>
+            Get the thumbprint from the token's header
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.ITokenDecoder.AuthenticationKeyUrl">
+            <summary>
+            Gets a valid Url for a public key for authenticating the signature in the token.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.VersionField">
+            <summary>
+            Metadocument required version field
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.AcceptedVersion">
+            <summary>
+            Metadocument required version value
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.MetaUrlField">
+            <summary>
+            location of public key
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.ExchangeUidField">
+            <summary>
+            signed user id
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.ThumbprintField">
+            <summary>
+            token's thumbprint field
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.authenticationUrl">
+            <summary>
+            Uri of path to public key metadocument
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.rawToken">
+            <summary>
+            Array of strings containing the token's fields
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.header">
+            <summary>
+            header section JSON
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.payload">
+            <summary>
+            payload section JSON
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the Base64EncodedTokenDecoder class.
+            </summary>
+            <param name="token">Original token as string</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.ExtractDelimitedToken(System.String)">
+            <summary>
+            Splits the received token into sections for decoding
+            </summary>
+            <param name="rawToken">The source token</param>
+            <returns>An array of Token Sections</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.DecodeSection(System.String)">
+            <summary>
+            Decodes a given section from Base64 to a plaintext string
+            </summary>
+            <param name="section">the section to decode</param>
+            <returns>the decoded section</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.ValidateVersion(System.String)">
+            <summary>
+            Checks decoded token for valid version
+            </summary>
+            <param name="expectedVersion">The current accepted version string</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.ValidateMetaDocumentUrl">
+            <summary>
+            Checks decoded token for valid metadocument url
+            </summary>
+            <returns>validated Uri to valid public key metadocument</returns>
+            <remarks>supports our readonly uri</remarks>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.AuthenticationKeyUrl">
+            <summary>
+            Gets a valid Url for a public key for authenticating the signature in the token.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.ExchangeUserId">
+            <summary>
+            Gets the Unique MSEX_UserId value listed in the token
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.Version">
+            <summary>
+            Gets the appctx.version of the token
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.Thumbprint">
+            <summary>
+            Get the xt5 thumbprint from the token's header
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.Base64EncodedTokenDecoder.RawToken">
+            <summary>
+            Gets a string containing the original token in raw form.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.CallerIdentityTokenHandler">
+            <summary>
+            Definition for the CallerIdentityTokenHandler class
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.CallerIdentityTokenHandler.#ctor(System.Uri,System.String)">
+            <summary>
+            Initializes a new instance of the CallerIdentityTokenHandler class.
+            </summary>
+            <param name="extensionServiceHost">The source url of the current public key's document</param>
+            <param name="key">The key to certify</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.CallerIdentityTokenHandler.ValidateToken(System.IdentityModel.Tokens.SecurityToken)">
+            <summary>
+            Validates the token
+            </summary>
+            <param name="token">token to be validated</param>
+            <returns>a Claims Identity Collection</returns>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken">
+            <summary>
+            Definition for AppIdentityToken
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.token">
+            <summary>
+            decoded token for internal use
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.retriever">
+            <summary>
+            IMetaDocumentRetriever instance for retrieving the public key.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.keyinfo">
+            <summary>
+            PublicKeyInfo exposed for determining if key has been cached.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.uniqueUserId">
+            <summary>
+            The concatenated amurl's dnssafehost + the token's ExchUid
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.expiration">
+            <summary>
+            The time of expiration for a validated token
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.version">
+            <summary>
+            The version
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.claims">
+            <summary>
+            The ClaimsIdentityCollection returned by the token handler
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.#ctor(Microsoft.Exchange.WebServices.Auth.Validation.ITokenDecoder,Microsoft.Exchange.WebServices.Auth.Validation.IMetaDocumentRetriever)">
+            <summary>
+            Initializes a new instance of the AppIdentityToken class.
+            </summary>
+            <param name="tokenDecoder">ITokenDecoder containing a token in the expected token</param>
+            <param name="metaDocumentRetriever">IMetaDocumentRetrieverSingleton MetaDocument Retriever</param>
+            <remarks>Correctly formatted does not guarantee validity.  It simply means the token is in the expected format.</remarks>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.Validate(System.Uri)">
+            <summary>
+            validate the current token against the public key
+            </summary>
+            <param name="extensionServiceHost">url for the signed token's public key</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.Validate(System.Uri,System.String)">
+            <summary>
+            validate the current token against the public key
+            </summary>
+            <param name="extensionServiceHost">url for the signed token's public key</param>
+            <param name="catchedKey">public key</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.ProcessToken(System.Uri,System.String)">
+            <summary>
+            validate the current token against the a public key
+            </summary>
+            <param name="extensionServiceHost">url for the signed token's public key</param>
+            <param name="key">the PublicKey to validate</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.PopulateIdentityToken(System.IdentityModel.Tokens.SecurityToken,System.String)">
+            <summary>
+            populates the internal IdentityToken attributes upon a successful key + token validation.
+            </summary>
+            <param name="token">Token processed by the TokenHandler</param>
+            <param name="key">The current public key's value</param>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.PublicKeyInfo">
+            <summary>
+            Gets the token's PublicKeyInfo
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.UniqueUserIdentification">
+            <summary>
+            Gets a Unique User ID from a validated token or returns null.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.ExpirationDate">
+            <summary>
+            Gets the Date and Time when this IdentityToken expires.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.Version">
+            <summary>
+            Gets the Claim Version
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.AppIdentityToken.Claims">
+            <summary>
+            Gets the ClaimsIdentityCollection validated during validation
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.HttpMetaDocumentRetriever">
+            <summary>
+            Definition of the HttpMetaDocumentRetriever class
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.IMetaDocumentRetriever">
+            <summary>
+            Definition for the IMetaDocumentRetriever Interface
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.IMetaDocumentRetriever.GetData(System.Uri,System.Boolean,System.String@)">
+            <summary>
+            Retrieves a MetaDocument for validating a Token Signature
+            </summary>
+            <param name="url">Url to the metadocument</param>
+            <param name="bypassCache">Ignore a catched version of the metadocument</param>
+            <param name="publicKeyDocument">string which will contain the returned public key document</param>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.HttpMetaDocumentRetriever.singleton">
+            <summary>
+            holds the one permitted instance of the HttpMetaDocumentRetriever class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.HttpMetaDocumentRetriever.#ctor">
+            <summary>
+            Prevents a default instance of the HttpMetaDocumentRetriever class from being created.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.HttpMetaDocumentRetriever.GetData(System.Uri,System.Boolean,System.String@)">
+            <summary>
+            Gets an authentification MetaDocument via Http
+            </summary>
+            <param name="url">Uri to the MetaDocument</param>
+            <param name="bypassCache">indicates whether the metadocument cache should be ignored</param>
+            <param name="publicKeyDocument">string which will contain the returned public key document</param>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.HttpMetaDocumentRetriever.Instance">
+            <summary>
+            Gets a singleton instance of the HttpMetaDocumentRetriever class
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder">
+            <summary>
+            Definition for the JsonDecoder class
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.fields">
+            <summary>
+            Dictionary of discovered name value pairs
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.embeddedLists">
+            <summary>
+            Dictionary of discovered embedded lists
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the JsonDecoder class.
+            </summary>
+            <param name="jsonContent">JSON to decode as a string</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.#ctor(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Initializes a new instance of the JsonDecoder class.
+            </summary>
+            <param name="jsonDictionary">JSON dictioanary to deep decode.</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.GetField(System.String)">
+            <summary>
+            Gets the value of a named field discovered during decoding.
+            </summary>
+            <param name="name">Name of the field to return</param>
+            <returns>Value of field as a string or an Empty string if the named field was not found.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.GetField(System.String,System.Boolean)">
+            <summary>
+            Gets the value of a named field discovered during decoding.
+            </summary>
+            <param name="name">Name of the field to return</param>
+            <param name="mustExist">throw an error if the field does not exist.</param>
+            <returns>Value of field as a string</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.GetFields">
+            <summary>
+            Gets a list of fieldnames in string form
+            </summary>
+            <returns>A List of strings</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.GetChildObjects(System.String)">
+            <summary>
+            Deserialize an array of child objects.
+            </summary>
+            <param name="fieldName">the name of the field containing a JSON'd array</param>
+            <returns>A List of JsonDecoder objects.</returns>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.RunWithJavaScriptSerializerExceptionHandler(System.Action)">
+            <summary>
+            Helper to wrap JavaScriptSerializer action, catching the interesting exception and rethrowing
+            appropriate exception.
+            </summary>
+            <param name="action">The action to run</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.UnpackJsonPayload(System.String,System.String)">
+            <summary>
+            Deserialize a JSON payload and load into a Dictionary of fieldname strings
+            </summary>
+            <param name="keyPrefix">an optional prefix to append to this decoders fields</param>
+            <param name="jsonContent">JSON encoded string payload </param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.JsonDecoder.UnpackJsonPayload(System.String,System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Deserialize a JSON payload and load into a Dictionary of fieldname strings
+            </summary>
+            <param name="keyPrefix">an optional prefix to append to this decoders fields</param>
+            <param name="dictionary">Dictionary of objects to unpack.</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.PublicKey">
+            <summary>
+            Definition of the PublicKey class
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKey.Usage">
+            <summary>
+            string containing the key's intended purpose
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKey.Type">
+            <summary>
+            string containing the key's name
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKey.Value">
+            <summary>
+            string containing the key's value
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKey.Thumbprint">
+            <summary>
+            string containing the key's thumbprint
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.PublicKey.#ctor(System.String,System.String,System.String,System.String)">
+            <summary>
+            Initializes a new instance of the PublicKey class
+            </summary>
+            <param name="type">type of key as string, e.g: x509Certificate</param>
+            <param name="value">value of key as a Base64 encoded string</param>
+            <param name="usage">intended usage of key</param>
+            <param name="thumbprint">key thumbprint</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder">
+            <summary>
+            Definition for the PublicKeyDocumentDecoder class
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.KeysField">
+            <summary>
+            Name of the keys field
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.KeyUsageField">
+            <summary>
+            Name of a key intended usage field
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.KeyThumbprintField">
+            <summary>
+            Name of the key's thumbprint field
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.KeyTypeField">
+            <summary>
+            Name of a key Type field
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.KeyValueField">
+            <summary>
+            Name of a key Value field
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.keys">
+            <summary>
+            List of PublicKeys found in the parsed document
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the PublicKeyDocumentDecoder class.
+            </summary>
+            <param name="publicKeyDocument">document containing the public key to be certified.</param>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyDocumentDecoder.Keys">
+            <summary>
+            Gets an enumerable list of keys in string form
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyInfo">
+            <summary>
+            Definition of the PublicKeyInfo class
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyInfo.Key">
+            <summary>
+            string containing the key's name
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyInfo.Value">
+            <summary>
+            string containing the key's value
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.PublicKeyInfo.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the PublicKeyInfo class
+            </summary>
+            <param name="key">name of key as string</param>
+            <param name="value">value of key as string</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenAudienceException">
+            <summary>
+            Definition for InvalidTokenAudienceException
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.TokenValidationException">
+            <summary>
+            Definition for TokenValidationException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.TokenValidationException.#ctor">
+            <summary>
+            Initializes a new instance of the TokenValidationException class
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.TokenValidationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the TokenValidationException class
+            </summary>
+            <param name="message">message to show</param>
+            <param name="innerException">Inner exceptioin object.</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.TokenValidationException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the TokenValidationException class
+            </summary>
+            <param name="message">information about the exceptions cause</param>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenAudienceException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the InvalidTokenAudienceException class.
+            </summary>
+            <param name="message">message describing that the audience is invalid</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenFormatException">
+            <summary>
+            Definition for InvalidTokenFormatException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenFormatException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the InvalidTokenFormatException class.
+            </summary>
+            <param name="message">message describing actual count vs. expected field count</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenSignatureException">
+            <summary>
+            Definition for InvalidTokenSignatureException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenSignatureException.#ctor">
+            <summary>
+            Initializes a new instance of the InvalidTokenSignatureException class.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenSignatureException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the InvalidTokenSignatureException class.
+            </summary>
+            <param name="message">description of the reason for the exception</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenVersionException">
+            <summary>
+            Definition for InvalidTokenVersionException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.InvalidTokenVersionException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the InvalidTokenVersionException class.
+            </summary>
+            <param name="message">message describing actual token version vs. expected version</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.MalformedContentException">
+            <summary>
+            Definition for MalformedContentException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.MalformedContentException.#ctor">
+            <summary>
+            Initializes a new instance of the MalformedContentException class.
+            </summary>
+            <remarks>Reports that the JSON'ed content is malformed.</remarks>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.MalformedContentException.#ctor(System.Exception)">
+            <summary>
+            Initializes a new instance of the MalformedContentException class.
+            </summary>
+            <param name="innerException">inner exception</param>
+            <remarks>Reports that the JSON'ed content is malformed.</remarks>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.MalformedContentException.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the MalformedContentException class.
+            </summary>
+            <param name="message">The message to report with an insertion point for the field.</param>
+            <param name="fieldName">the name of the malformed field</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.MetadataAccessException">
+            <summary>
+            Definition for MetadataAccessException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.MetadataAccessException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the MetadataAccessException class.
+            </summary>
+            <param name="details">message describing the specific error encountered while retrieving the Metadocument</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.MissingFieldException">
+            <summary>
+            Definition for MissingFieldException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.MissingFieldException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the MissingFieldException class.
+            </summary>
+            <param name="fieldName">name of the missing field</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.TokenExpiredException">
+            <summary>
+            Definition for TokenExpiredException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.TokenExpiredException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the TokenExpiredException class.
+            </summary>
+            <param name="message">message describing that the token is expired</param>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Validation.TokenRequiresValidationException">
+            <summary>
+            Definition for TokenRequiresValidationException
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Validation.TokenRequiresValidationException.#ctor">
+            <summary>
+            Initializes a new instance of the TokenRequiresValidationException class.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Strings">
+            <summary>
+            Localized Strings
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.stringIDs">
+            <summary>
+            IDS available on this class that do not require parameters.
+            Using this array is faster than calling enum.ToString.
+            </summary>
+        </member>
+        <member name="M:Microsoft.Exchange.WebServices.Auth.Strings.GetLocalizedString(Microsoft.Exchange.WebServices.Auth.Strings.IDs)">
+            <summary>
+            Returns the localized string corresponding to the given key
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.ResourceManager">
+            <summary>
+            Resource Manager
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MalformedUrlBadHost">
+            <summary>
+            The authentication metadata document's URL found in the token does not have a valid DNS Hostname. Extracted URL: '{0}'
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.RequiresValidation">
+            <summary>
+            The token has not been validated and requires a successful validation.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MalformedUrl">
+            <summary>
+            The authentication metadata document's URL found in the token is malformed.  Extracted URL: '{0}'
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.InvalidSet">
+            <summary>
+            The field '{0}' could not be converted into a set.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MetadataAccessFailure">
+            <summary>
+            The Metadocument could not be retrieved. {0}
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.NotASet">
+            <summary>
+            The field '{0}' does not contain a set.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MissingUrl">
+            <summary>
+            The token does not contain an authentication metadata document URL.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MalformedJson">
+            <summary>
+            The JSON'd content could not be deserialized.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MissingField">
+            <summary>
+            The credentials do not contain a '{0}' field.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MalformedUrlBadScheme">
+            <summary>
+            The authentication metadata document's URL found in the token does not have a valid Scheme name. Extracted URL: '{0}'
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.InvalidTokenSignatureException">
+            <summary>
+            The supplied token failed public key signature authentication.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.InvalidToken">
+            <summary>
+            The given token is invalid.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MalformedField">
+            <summary>
+            The credentials contain an invalid '{0}' field.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.InvalidTokenVersion">
+            <summary>
+            The token version {0} does not match the expected version {1}.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.InvalidTokenFieldCount">
+            <summary>
+            The token contained {0} fields.  It is supposed to contain 3.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.NoMatchingKey">
+            <summary>
+            No matching key was found for this token with thumbprint '{0}'.
+            </summary>
+        </member>
+        <member name="P:Microsoft.Exchange.WebServices.Auth.Strings.MissingTokenVersion">
+            <summary>
+            The token does not contain a version.
+            </summary>
+        </member>
+        <member name="T:Microsoft.Exchange.WebServices.Auth.Strings.IDs">
+            <summary>
+            ID of the strings available on this class that do not require parameters.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MalformedUrlBadHost">
+            <summary>
+            The authentication metadata document's URL found in the token does not have a valid DNS Hostname. Extracted URL: '{0}'
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.RequiresValidation">
+            <summary>
+            The token has not been validated and requires a successful validation.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MalformedUrl">
+            <summary>
+            The authentication metadata document's URL found in the token is malformed.  Extracted URL: '{0}'
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.InvalidSet">
+            <summary>
+            The field '{0}' could not be converted into a set.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MetadataAccessFailure">
+            <summary>
+            The Metadocument could not be retrieved. {0}
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.NotASet">
+            <summary>
+            The field '{0}' does not contain a set.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MissingUrl">
+            <summary>
+            The token does not contain an authentication metadata document URL.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MalformedJson">
+            <summary>
+            The JSON'd content could not be deserialized.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MissingField">
+            <summary>
+            The credentials do not contain a '{0}' field.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MalformedUrlBadScheme">
+            <summary>
+            The authentication metadata document's URL found in the token does not have a valid Scheme name. Extracted URL: '{0}'
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.InvalidTokenSignatureException">
+            <summary>
+            The supplied token failed public key signature authentication.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.InvalidToken">
+            <summary>
+            The given token is invalid.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MalformedField">
+            <summary>
+            The credentials contain an invalid '{0}' field.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.InvalidTokenVersion">
+            <summary>
+            The token version {0} does not match the expected version {1}.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.InvalidTokenFieldCount">
+            <summary>
+            The token contained {0} fields.  It is supposed to contain 3.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.NoMatchingKey">
+            <summary>
+            No matching key was found for this token with thumbprint '{0}'.
+            </summary>
+        </member>
+        <member name="F:Microsoft.Exchange.WebServices.Auth.Strings.IDs.MissingTokenVersion">
+            <summary>
+            The token does not contain a version.
+            </summary>
+        </member>
+    </members>
+</doc>

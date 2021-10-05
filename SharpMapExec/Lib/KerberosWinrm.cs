@@ -26,6 +26,11 @@ namespace SharpMapExec.Lib
                 Console.WriteLine("[-] Need path and destination");
                 return;
             }
+            if (module.Contains("upload") && (String.IsNullOrEmpty(path) || String.IsNullOrEmpty(destination)))
+            {
+                Console.WriteLine("[-] Need path and destination");
+                return;
+            }
             StartJob(users, domain, passwords, hash, ticket, encType, dc, computernames, module, moduleargument, path, destination, flags);
             //var listOfTasks = new List<Task>();
             //listOfTasks.Add(new Task(() => StartJob(users, domain, passwords, hash, ticket, encType, dc, computernames, module, moduleargument, flags)));
@@ -103,6 +108,10 @@ namespace SharpMapExec.Lib
                             {
                                 Wsman.CopyFile(computername, path, destination);
                             }
+                            else if (module.Contains("upload"))
+                            {
+                                Wsman.UploadFile(computername, path, destination);
+                            }
                             Console.WriteLine("");
                         }
                     }
@@ -156,6 +165,10 @@ namespace SharpMapExec.Lib
                     else if (module.Contains("download"))
                     {
                         Wsman.CopyFile(computername, path, destination);
+                    }
+                    else if (module.Contains("upload"))
+                    {
+                        Wsman.UploadFile(computername, path, destination);
                     }
                     Console.WriteLine("");
                 }

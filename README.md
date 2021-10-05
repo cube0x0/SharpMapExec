@@ -28,7 +28,8 @@ SharpMapExec.exe
       Available WinRm modules
           /m:exec /a:whoami                           (Invoke-Command)
           /m:exec /a:C:\beacon.exe /system            (Invoke-Command as System)
-          /m:comsvcs                                  (Dump Lsass Process)
+          /m:exec /a:C:\beacon.exe /delegwalk         (Invoke-Command as all signed in users)
+          /m:comsvcs                                  (Dump and Parse Lsass Process)
           /m:secrets                                  (Dump and Parse Sam, Lsa, and System Dpapi blobs)
           /m:assembly /p:Rubeus.exe /a:dump           (Execute Local C# Assembly in memory)
           /m:assembly /p:beacon.exe /system           (Execute Local C# Assembly as System in memory)
@@ -89,6 +90,14 @@ Discover local admin password reuse with an NT hash.
 Mass dump Lsass process with built-in Microsoft signed DLL and saves it to the `loot` folder
 
 ![](images/lsassdump.png)
+
+Executes in all delegation processes sorted by unique by users
+
+![](images/delegwalk.png)
+
+Scan for SMB signing and SMBv1, Danke Pingcastle
+
+![](images/smbvscan.png)
 
 And much more!
 

