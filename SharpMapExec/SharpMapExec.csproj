@@ -40,6 +40,9 @@
     <Reference Include="Microsoft.Dynamic, Version=1.3.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\DynamicLanguageRuntime.1.3.0\lib\net45\Microsoft.Dynamic.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Management.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Management.Infrastructure.4.0.0\lib\Microsoft.Management.Infrastructure.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Scripting, Version=1.3.0.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\DynamicLanguageRuntime.1.3.0\lib\net45\Microsoft.Scripting.dll</HintPath>
     </Reference>
@@ -69,12 +72,15 @@
     <Compile Include="Args\ArgumentParserResult.cs" />
     <Compile Include="Args\CommandCollection.cs" />
     <Compile Include="Args\Info.cs" />
+    <Compile Include="Commands\kerberosReg32.cs" />
     <Compile Include="Commands\KerberosTgtdeleg.cs" />
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\kerberosSmb.cs" />
     <Compile Include="Commands\KerberosSpray.cs" />
     <Compile Include="Commands\kerberosWinrm.cs" />
+    <Compile Include="Commands\NtlmReg32.cs" />
     <Compile Include="Commands\NtlmSmb.cs" />
+    <Compile Include="Commands\NtlmCim.cs" />
     <Compile Include="Commands\NtlmWinrm.cs" />
     <Compile Include="Helpers\AmsiFail.cs" />
     <Compile Include="Helpers\Misc.cs" />
@@ -82,6 +88,9 @@
     <Compile Include="Helpers\Tasks.cs" />
     <Compile Include="Helpers\Impersonator.cs" />
     <Compile Include="Helpers\Jea.cs" />
+    <Compile Include="Lib\Cim.cs" />
+    <Compile Include="Lib\Reg32.cs" />
+    <Compile Include="Lib\Scan.cs" />
     <Compile Include="Projects\HiveParser\Crypto.cs" />
     <Compile Include="Projects\HiveParser\LsaSecret.cs" />
     <Compile Include="Projects\HiveParser\NL_Record.cs" />
@@ -89,10 +98,8 @@
     <Compile Include="Projects\HiveParser\Registry.cs" />
     <Compile Include="Projects\HiveParser\RegistryHive.cs" />
     <Compile Include="Projects\HiveParser\ValueKey.cs" />
-    <Compile Include="Lib\KerberosSmb.cs" />
-    <Compile Include="Lib\KerberosWinrm.cs" />
-    <Compile Include="Lib\NtlmSmb.cs" />
-    <Compile Include="Lib\NtlmWinrm.cs" />
+    <Compile Include="Lib\Kerberos.cs" />
+    <Compile Include="Lib\Ntlm.cs" />
     <Compile Include="Lib\Secrets.cs" />
     <Compile Include="Lib\Smb.cs" />
     <Compile Include="Lib\Wsman.cs" />
@@ -241,6 +248,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Helpers\JeaRules.ps1" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

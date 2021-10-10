@@ -5,16 +5,14 @@ using System.IO;
 
 namespace SharpMapExec.Commands
 {
-    public class kerberosWinrm : ICommand
+    public class kerberosReg32 : ICommand
     {
-        public static string CommandName => "kerberoswinrm";
+        public static string CommandName => "kerberosreg32";
 
         public void Execute(Dictionary<string, string> arguments)
         {
             string[] users = { };
             string domain = "";
-            string path = "";
-            string destination = "";
             string[] passwords = { };
             string[] hashes = { };
             string dc = "";
@@ -25,65 +23,13 @@ namespace SharpMapExec.Commands
             string moduleargument = "";
             List<string> flags = new List<string>();
 
-            if (arguments.ContainsKey("/d"))
-            {
-                destination = arguments["/d"];
-            }
-            if (arguments.ContainsKey("/destination"))
-            {
-                destination = arguments["/destination"];
-            }
-            if (arguments.ContainsKey("/p"))
-            {
-                path = arguments["/p"];
-            }
-            if (arguments.ContainsKey("/path"))
-            {
-                path = arguments["/path"];
-            }
-            if (arguments.ContainsKey("/m"))
-            {
-                module = arguments["/m"];
-            }
             if (arguments.ContainsKey("/module"))
             {
                 module = arguments["/module"];
             }
-            if (arguments.ContainsKey("/a"))
+            if (arguments.ContainsKey("/m"))
             {
-                moduleargument = arguments["/a"];
-            }
-            if (arguments.ContainsKey("/argument"))
-            {
-                moduleargument = arguments["/argument"];
-            }
-            if (arguments.ContainsKey("/assystem") || arguments.ContainsKey("/system"))
-            {
-                flags.Add("system");
-            }
-            if (arguments.ContainsKey("/asdelegwalk") || arguments.ContainsKey("/delegwalk"))
-            {
-                flags.Add("delegwalk");
-            }
-            if (module.Contains("exec") && moduleargument.Length == 0)
-            {
-                Console.WriteLine("[-] Missing exec argument");
-                return;
-            }
-            if (module.Contains("assembly") && !File.Exists(path))
-            {
-                Console.WriteLine("[-] Missing assembly path");
-                return;
-            }
-            if (module.Contains("download") && (String.IsNullOrEmpty(path) || String.IsNullOrEmpty(destination)))
-            {
-                Console.WriteLine("[-] Need path and destination");
-                return;
-            }
-            if (module.Contains("upload") && (String.IsNullOrEmpty(path) || String.IsNullOrEmpty(destination)))
-            {
-                Console.WriteLine("[-] Need path and destination");
-                return;
+                module = arguments["/m"];
             }
 
 
@@ -228,7 +174,7 @@ namespace SharpMapExec.Commands
                 return;
             }
 
-            Lib.kerberos.Kerberos(users, domain, passwords, hashes, ticket, encType, dc, computernames, module, moduleargument, path, destination, flags, "winrm");
+            Lib.kerberos.Kerberos(users, domain, passwords, hashes, ticket, encType, dc, computernames, module, moduleargument, "", "", flags, "reg32");
         }
     }
 }

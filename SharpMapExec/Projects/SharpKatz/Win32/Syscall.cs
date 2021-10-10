@@ -440,6 +440,10 @@ namespace SharpKatz.Win32
             public delegate bool CreateProcessWithLogonW(string userName, string domain, string password, LogonFlags dwLogonFlags, string applicationName, string commandLine, CreationFlags dwCreationFlags, uint environment, string currentDirectory, ref STARTUPINFO startupInfo, out PROCESS_INFORMATION processInformation);
 
             [SuppressUnmanagedCodeSecurity]
+            [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+            public delegate bool CreateProcessWithLogonWW(string userName, string domain, string password, LogonFlags dwLogonFlags, string applicationName, string commandLine, CreationFlags dwCreationFlags, uint environment, string currentDirectory, ref STARTUPINFOEX startupInfo, out PROCESS_INFORMATION processInformation);
+
+            [SuppressUnmanagedCodeSecurity]
             [UnmanagedFunctionPointer(CallingConvention.StdCall)]
             public delegate bool DuplicateTokenEx(IntPtr hExistingToken, uint dwDesiredAccess, ref SECURITY_ATTRIBUTES lpTokenAttributes, int ImpersonationLevel, int TokenType, ref IntPtr phNewToken);
 

@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Sockets;
+using System.Security;
 using System.Text;
 
 namespace SharpMapExec.Helpers
@@ -30,6 +31,7 @@ namespace SharpMapExec.Helpers
                 return resultStream.ToArray();
             }
         }
+
         public static bool CheckHostPort(string hostname, int port, int PortScanTimeout = 2000)
         {
             using (var client = new TcpClient())
@@ -80,6 +82,16 @@ namespace SharpMapExec.Helpers
                              .Where(x => x % 2 == 0)
                              .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
                              .ToArray();
+        }
+
+        public static SecureString CreateSecuredString(string pw)
+        {
+            SecureString secureString = new SecureString();
+            if (string.IsNullOrEmpty(pw))
+                return null;
+            foreach (char c in pw)
+                secureString.AppendChar(c);
+            return secureString;
         }
     }
 }

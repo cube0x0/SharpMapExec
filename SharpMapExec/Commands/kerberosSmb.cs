@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using static SharpMapExec.Lib.kerberossmb;
 
 namespace SharpMapExec.Commands
 {
@@ -41,6 +40,8 @@ namespace SharpMapExec.Commands
                 moduleargument = arguments["/argument"];
             }
 
+
+            //
             if (arguments.ContainsKey("/user"))
             {
                 if (File.Exists(arguments["/user"]))
@@ -180,7 +181,8 @@ namespace SharpMapExec.Commands
                 Console.WriteLine("\r\n[X] Only /des, /rc4, /aes128, and /aes256 are supported at this time.\r\n");
                 return;
             }
-            KerberosSmb(users, domain, passwords, hashes, ticket, encType, dc, computernames, module, moduleargument, flags);
+
+            Lib.kerberos.Kerberos(users, domain, passwords, hashes, ticket, encType, dc, computernames, module, moduleargument, "", "", flags, "smb");
         }
     }
 }

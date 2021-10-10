@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using static SharpMapExec.Helpers.SecurityContext;
-using static SharpMapExec.Lib.ntlmwinrm;
 
 namespace SharpMapExec.Commands
 {
@@ -63,7 +62,29 @@ namespace SharpMapExec.Commands
             {
                 flags.Add("delegwalk");
             }
+            if (module.Contains("exec") && moduleargument.Length == 0)
+            {
+                Console.WriteLine("[-] Missing exec argument");
+                return;
+            }
+            if (module.Contains("assembly") && !File.Exists(path))
+            {
+                Console.WriteLine("[-] Missing assembly path");
+                return;
+            }
+            if (module.Contains("download") && (String.IsNullOrEmpty(path) || String.IsNullOrEmpty(destination)))
+            {
+                Console.WriteLine("[-] Need path and destination");
+                return;
+            }
+            if (module.Contains("upload") && (String.IsNullOrEmpty(path) || String.IsNullOrEmpty(destination)))
+            {
+                Console.WriteLine("[-] Need path and destination");
+                return;
+            }
 
+
+            //
             if (arguments.ContainsKey("/domain"))
             {
                 domain = arguments["/domain"];
@@ -143,13 +164,15 @@ namespace SharpMapExec.Commands
                 Console.WriteLine("[-] /password or /ntlm must be supplied");
                 return;
             }
+            
+
             if (password.Cleartext != null)
             {
-                NtlmWinRm(user, domain, password, computernames, module, moduleargument, path, destination, flags);
+                Lib.ntlm.Ntlm(user, domain, password, computernames, module, moduleargument, path, destination, flags, "winrm");
             }
             else
             {
-                NtlmWinRm(user, domain, hash, computernames, module, moduleargument, path, destination, flags);
+                Lib.ntlm.Ntlm(user, domain, hash, computernames, module, moduleargument, path, destination, flags, "winrm");
             }
         }
     }

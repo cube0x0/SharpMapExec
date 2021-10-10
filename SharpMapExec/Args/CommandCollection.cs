@@ -20,8 +20,11 @@ namespace SharpMapExec.args
             _availableCommands.Add(kerbspray.CommandName, () => new kerbspray());
             _availableCommands.Add(kerberosSmb.CommandName, () => new kerberosSmb());
             _availableCommands.Add(kerberosWinrm.CommandName, () => new kerberosWinrm());
+            _availableCommands.Add(kerberosReg32.CommandName, () => new kerberosReg32());
             _availableCommands.Add(NtlmWinrm.CommandName, () => new NtlmWinrm());
             _availableCommands.Add(NtlmSmb.CommandName, () => new NtlmSmb());
+            _availableCommands.Add(NtlmCim.CommandName, () => new NtlmCim());
+            _availableCommands.Add(NtlmReg32.CommandName, () => new NtlmReg32());
         }
 
         public bool ExecuteCommand(string commandName, Dictionary<string, string> arguments)

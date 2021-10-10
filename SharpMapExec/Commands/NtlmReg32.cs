@@ -5,14 +5,16 @@ using static SharpMapExec.Helpers.SecurityContext;
 
 namespace SharpMapExec.Commands
 {
-    public class NtlmSmb : ICommand
+    public class NtlmReg32 : ICommand
     {
-        public static string CommandName => "ntlmsmb";
+        public static string CommandName => "ntlmreg32";
 
         public void Execute(Dictionary<string, string> arguments)
         {
             string[] user;
             string domain = "";
+            string path = "";
+            string destination = "";
             string[] computernames;
             var hash = new NTHash();
             var password = new ClearText();
@@ -20,23 +22,14 @@ namespace SharpMapExec.Commands
             string moduleargument = "";
             List<string> flags = new List<string>();
 
-            if (arguments.ContainsKey("/m"))
-            {
-                module = arguments["/m"];
-            }
             if (arguments.ContainsKey("/module"))
             {
                 module = arguments["/module"];
             }
-            if (arguments.ContainsKey("/a"))
+            if (arguments.ContainsKey("/m"))
             {
-                moduleargument = arguments["/a"];
+                module = arguments["/m"];
             }
-            if (arguments.ContainsKey("/argument"))
-            {
-                moduleargument = arguments["/argument"];
-            }
-
 
             //
             if (arguments.ContainsKey("/domain"))
@@ -118,13 +111,34 @@ namespace SharpMapExec.Commands
                 Console.WriteLine("[-] /password or /ntlm must be supplied");
                 return;
             }
+            if (module.Contains("exec") && moduleargument.Length == 0)
+            {
+                Console.WriteLine("[-] Missing exec argument");
+                return;
+            }
+            if (module.Contains("assembly") && !File.Exists(path))
+            {
+                Console.WriteLine("[-] Missing assembly path");
+                return;
+            }
+            if (module.Contains("download") && (String.IsNullOrEmpty(path) || String.IsNullOrEmpty(destination)))
+            {
+                Console.WriteLine("[-] Need path and destination");
+                return;
+            }
+            if (module.Contains("upload") && (String.IsNullOrEmpty(path) || String.IsNullOrEmpty(destination)))
+            {
+                Console.WriteLine("[-] Need path and destination");
+                return;
+            }
+
             if (password.Cleartext != null)
             {
-                Lib.ntlm.Ntlm(user, domain, password, computernames, module, moduleargument, "", "", flags, "smb");
+                Lib.ntlm.Ntlm(user, domain, password, computernames, module, moduleargument, path, destination, flags, "reg32");
             }
             else
             {
-                Lib.ntlm.Ntlm(user, domain, hash, computernames, module, moduleargument, "", "", flags, "smb");
+                Lib.ntlm.Ntlm(user, domain, hash, computernames, module, moduleargument, path, destination, flags, "reg32");
             }
         }
     }

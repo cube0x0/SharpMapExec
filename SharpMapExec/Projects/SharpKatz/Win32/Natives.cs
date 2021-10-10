@@ -2257,6 +2257,13 @@ namespace SharpKatz.Win32
             return CreateProcessWithLogonW(userName, domain, password, dwLogonFlags, applicationName, commandLine, dwCreationFlags, environment, currentDirectory, ref startupInfo, out processInformation);
         }
 
+        public static bool CreateProcessWithLogonW(string userName, string domain, string password, LogonFlags dwLogonFlags, string applicationName, string commandLine, CreationFlags dwCreationFlags, uint environment, string currentDirectory, ref STARTUPINFOEX startupInfoEx, out PROCESS_INFORMATION processInformation)
+        {
+            IntPtr proc = GetProcAddress(GetAdvapi32(), "CreateProcessWithLogonW");
+            SysCall.Delegates.CreateProcessWithLogonWW CreateProcessWithLogonW = (SysCall.Delegates.CreateProcessWithLogonWW)Marshal.GetDelegateForFunctionPointer(proc, typeof(SysCall.Delegates.CreateProcessWithLogonWW));
+            return CreateProcessWithLogonW(userName, domain, password, dwLogonFlags, applicationName, commandLine, dwCreationFlags, environment, currentDirectory, ref startupInfoEx, out processInformation);
+        }
+
         public static bool DuplicateTokenEx(IntPtr hExistingToken, uint dwDesiredAccess, ref SECURITY_ATTRIBUTES lpTokenAttributes, int ImpersonationLevel, int TokenType, ref IntPtr phNewToken)
         {
             IntPtr proc = GetProcAddress(GetKernelbase(), "DuplicateTokenEx");
@@ -2328,6 +2335,40 @@ namespace SharpKatz.Win32
             IntPtr proc = GetProcAddress(GetAdvapi32(), "ImpersonateLoggedOnUser");
             SysCall.Delegates.ImpersonateLoggedOnUser ImpersonateLoggedOnUser = (SysCall.Delegates.ImpersonateLoggedOnUser)Marshal.GetDelegateForFunctionPointer(proc, typeof(SysCall.Delegates.ImpersonateLoggedOnUser));
             return ImpersonateLoggedOnUser(hToken);
+        }
+
+        //
+        [DllImport("kernel32.dll")]
+        public static extern bool CreatePipe(out IntPtr phReadPipe, out IntPtr phWritePipe, ref SECURITY_ATTRIBUTES lpPipeAttributes, uint nSize);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool SetHandleInformation(IntPtr hObject, HANDLE_FLAGS dwMask, HANDLE_FLAGS dwFlags);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool PeekNamedPipe(IntPtr handle, IntPtr buffer, IntPtr nBufferSize, IntPtr bytesRead, ref uint bytesAvail, IntPtr BytesLeftThisMessage);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetConsoleOutputCP();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern UInt32 WaitForSingleObject(IntPtr handle, UInt32 milliseconds);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool WriteFile(IntPtr hFile, byte[] buffer, UInt32 nNumberOfBytesToWrite, out UInt32 lpNumberOfBytesWritten, [In] IntPtr lpOverlapped);
+
+        [Flags]
+        public enum HANDLE_FLAGS : uint
+        {
+            None = 0,
+            INHERIT = 1,
+            PROTECT_FROM_CLOSE = 2
+        }
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct STARTUPINFOEX
+        {
+            public STARTUPINFO StartupInfo;
+            public IntPtr lpAttributeList;
         }
     }
 }
