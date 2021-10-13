@@ -10,6 +10,7 @@ namespace SharpMapExec.args
 
             //Cim
             Console.WriteLine("\r\n    --- Cim ---");
+            Console.WriteLine(@"        Need plaintext password or the /impersonate flag");
             Console.WriteLine(@"        SharpMapExec.exe ntlm cim /user:USER /password:PASSWORD /computername:TARGET");
             Console.WriteLine("\n       Available Cim modules");
             Console.WriteLine(@"          /m:enable_winrm                             (Runs Enable-PSRemoting -Force)");

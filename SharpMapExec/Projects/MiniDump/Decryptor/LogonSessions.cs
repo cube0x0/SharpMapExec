@@ -158,9 +158,9 @@ namespace Minidump.Decryptor
             "CachedUnlock"
         };
 
-        public static List<Logon> FindSessions(Program.MiniDump minidump, msv.MsvTemplate template)
+        public static List<Logon> FindSessions(Program.MiniDump minidump, msv.MsvTemplate template, int ptr_entry_offset = 1)
         {
-            //Minidump.PrintProperties(template);
+            //PrintProperties(template);
 
             List<Logon> logonlist = new List<Logon>();
             List<long> offsetlist = new List<long>();
@@ -172,34 +172,52 @@ namespace Minidump.Decryptor
                 return logonlist;
             }
 
-            long logonSessionOffset = (long)get_ptr_with_offset(minidump.fileBinaryReader, (logonSessionListSignOffset + template.LogonSessionListCountOffset), minidump.sysinfo);
-            int logonSessionListCount = ReadInt32(minidump.fileBinaryReader, logonSessionOffset);
+            ulong logonSessionOffset = get_ptr_with_offset(minidump.fileBinaryReader, (logonSessionListSignOffset + template.LogonSessionListCountOffset), minidump.sysinfo);
+            uint logonSessionListCount = ReadInt8(minidump.fileBinaryReader, (long)logonSessionOffset);
 
+            //Console.WriteLine($"logonSessionOffset {(Int32)logonSessionOffset}");
             //Console.WriteLine($"Parsing {logonSessionListCount} logon sessions");
+
+            long offset = logonSessionListSignOffset + template.first_entry_offset;
+            long listMemOffset = ReadInt32(minidump.fileBinaryReader, logonSessionListSignOffset + template.first_entry_offset);
+            long ptr_entry_loc = offset + sizeof(int) + listMemOffset;
+
             for (var i = 0; i < logonSessionListCount; i++)
             {
+                long listentry;
+                long entry_ptr;
+                long pos;
                 //Console.WriteLine($"Parsing session {i}");
-                long offset = logonSessionListSignOffset + template.first_entry_offset;
-                long listMemOffset = ReadInt32(minidump.fileBinaryReader, offset);
-                long tmp_offset = (int)offset + sizeof(int) + (int)listMemOffset + (16 * i);
-                var voffset = ReadInt64(minidump.fileBinaryReader, tmp_offset);
-                long current = Rva2offset(minidump, voffset);
 
+                entry_ptr = ptr_entry_loc + (16 * i);
+                listentry = ReadInt64(minidump.fileBinaryReader, entry_ptr);
+                //offsetlist.Add(listentry);
+                if (entry_ptr == listentry)
+                    continue;
+
+                pos = entry_ptr;
+
+                int count = 0;
                 do
                 {
-                    long listentry = ReadInt64(minidump.fileBinaryReader, current);
-                    listentry = Rva2offset(minidump, listentry);
+                    listentry = Rva2offset(minidump, ReadInt64(minidump.fileBinaryReader, pos));
+                    //Console.WriteLine($"listentry {listentry}");
+
+                    count++;
+                    if (count >= 255)
+                        return null;
 
                     if (listentry == 0)
                         break;
-                    if (offsetlist.Contains((listentry + template.LocallyUniqueIdentifierOffset)))
+
+                    if (offsetlist.Contains((listentry)))
                     {
                         break;
                     }
+                    offsetlist.Add(listentry);
+
 
                     KIWI_BASIC_SECURITY_LOGON_SESSION_DATA logonsession = new KIWI_BASIC_SECURITY_LOGON_SESSION_DATA();
-
-                    offsetlist.Add(listentry + template.LocallyUniqueIdentifierOffset);
                     logonsession.LogonId = listentry + template.LocallyUniqueIdentifierOffset;
                     logonsession.LogonType = ReadInt32(minidump.fileBinaryReader, listentry + template.LogonTypeOffset);
                     logonsession.Session = ReadInt32(minidump.fileBinaryReader, listentry + template.SessionOffset);
@@ -244,9 +262,8 @@ namespace Minidump.Decryptor
                     //Console.WriteLine("session " + logon.Session + " luid " + logon.LogonId.LowPart + " username " + logon.UserName + " pCredentials " + logonsession.pCredentials);
                     //PrintProperties(logon);
                     logonlist.Add(logon);
-
-                    voffset = ReadInt64(minidump.fileBinaryReader, listentry);
-                    current = Rva2offset(minidump, voffset);
+                    pos = Rva2offset(minidump, ReadInt64(minidump.fileBinaryReader, pos));
+                    //Console.WriteLine(pos);
                 } while (true);
             }
 

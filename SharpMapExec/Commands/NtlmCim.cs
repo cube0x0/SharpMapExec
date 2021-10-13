@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Management.Infrastructure;
+using SharpMapExec.Lib;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using static SharpMapExec.Helpers.SecurityContext;
@@ -137,13 +139,22 @@ namespace SharpMapExec.Commands
                 return;
             }
 
-            if (password.Cleartext != null)
+            if (flags.Contains("impersonate"))
+            {
+                foreach (string computername in computernames)
+                {
+                    CimSession cimSession;
+                    cimSession = Cim.newSession(computername, "", "", "", true);
+                    Scan.CIM(cimSession, module);
+                }
+            }
+            else if (password.Cleartext != null)
             {
                 Lib.ntlm.Ntlm(user, domain, password, computernames, module, moduleargument, path, destination, flags, "cim");
             }
             else
             {
-                Console.WriteLine("[-] Need clear-text password for cim");
+                Console.WriteLine("[-] Need plaintext password or /impersonate for cim");
                 return;
             }
         }

@@ -18,10 +18,9 @@ namespace SharpMapExec.Lib
         public static CimSession newSession(string computername, string domain, string username, string password, bool impersonate = false)
         {
             CimSession cimSession;
-
             if (impersonate)
             {
-                DComSessionOptions options = new DComSessionOptions { Impersonation = ImpersonationType.Default };
+                DComSessionOptions options = new DComSessionOptions { Impersonation = ImpersonationType.Impersonate };
                 cimSession = CimSession.Create(computername, options);
             }
             else

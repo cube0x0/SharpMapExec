@@ -48,40 +48,41 @@ namespace Minidump.Decryptor
                     byte[] prtBytes = ReadBytes(minidump.fileBinaryReader, Rva2offset(minidump, (long)cacheEntry.PRT), (int)cacheEntry.cbPRT);
                     var DecryptedPRTBytes = BCrypt.DecryptCredentials(prtBytes, minidump.lsakeys);
                     string PRT = Encoding.ASCII.GetString(DecryptedPRTBytes.Skip(25).ToArray());
-
                     cloudapentry.PRT = PRT;
-                }
 
-                if (cacheEntry.toDetermine != 0)
-                {
-                    byte[] cacheunkBytes = ReadBytes(minidump.fileBinaryReader, Rva2offset(minidump, (long)cacheEntry.toDetermine), Marshal.SizeOf(typeof(KIWI_CLOUDAP_CACHE_UNK)));
-                    KIWI_CLOUDAP_CACHE_UNK cacheunk = ReadStruct<KIWI_CLOUDAP_CACHE_UNK>(cacheunkBytes);
-                    var DecryptedDpapiBytes = BCrypt.DecryptCredentials(cacheunk.unk, minidump.lsakeys);
 
-                    string key_guid = cacheunk.guid.ToString();
-                    string dpapi_key = BitConverter.ToString(DecryptedDpapiBytes).Replace("-", "");
-                    string dpapi_key_sha1 = BCrypt.GetHashSHA1(DecryptedDpapiBytes);
-
-                    cloudapentry.key_guid = key_guid;
-                    cloudapentry.dpapi_key = dpapi_key;
-                    cloudapentry.dpapi_key_sha = dpapi_key_sha1;
-                }
-
-                var currentlogon = minidump.logonlist.FirstOrDefault(x => x.LogonId.HighPart == luid.HighPart && x.LogonId.LowPart == luid.LowPart);
-                if (currentlogon == null)
-                {
-                    currentlogon = new Logon(luid)
+                    if (cacheEntry.toDetermine != 0)
                     {
-                        //UserName = username,
-                        Cloudap = new List<Cloudap>()
-                    };
-                    currentlogon.Cloudap.Add(cloudapentry);
-                    minidump.logonlist.Add(currentlogon);
-                }
-                else
-                {
-                    currentlogon.Cloudap = new List<Cloudap>();
-                    currentlogon.Cloudap.Add(cloudapentry);
+                        byte[] cacheunkBytes = ReadBytes(minidump.fileBinaryReader, Rva2offset(minidump, (long)cacheEntry.toDetermine), Marshal.SizeOf(typeof(KIWI_CLOUDAP_CACHE_UNK)));
+                        KIWI_CLOUDAP_CACHE_UNK cacheunk = ReadStruct<KIWI_CLOUDAP_CACHE_UNK>(cacheunkBytes);
+                        var DecryptedDpapiBytes = BCrypt.DecryptCredentials(cacheunk.unk, minidump.lsakeys);
+
+                        string key_guid = cacheunk.guid.ToString();
+                        string dpapi_key = BitConverter.ToString(DecryptedDpapiBytes).Replace("-", "");
+                        string dpapi_key_sha1 = BCrypt.GetHashSHA1(DecryptedDpapiBytes);
+
+                        cloudapentry.key_guid = key_guid;
+                        cloudapentry.dpapi_key = dpapi_key;
+                        cloudapentry.dpapi_key_sha = dpapi_key_sha1;
+                    }
+
+                    var currentlogon = minidump.logonlist.FirstOrDefault(x => x.LogonId.HighPart == luid.HighPart && x.LogonId.LowPart == luid.LowPart);
+                    if (currentlogon == null)
+                    {
+                        currentlogon = new Logon(luid)
+                        {
+                            //UserName = username,
+                            Cloudap = new List<Cloudap>()
+                        };
+                        currentlogon.Cloudap.Add(cloudapentry);
+                        minidump.logonlist.Add(currentlogon);
+                        //continue;
+                    }
+                    else
+                    {
+                        currentlogon.Cloudap = new List<Cloudap>();
+                        currentlogon.Cloudap.Add(cloudapentry);
+                    }
                 }
 
                 llCurrent = log.Flink;

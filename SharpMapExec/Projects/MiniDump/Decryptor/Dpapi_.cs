@@ -19,8 +19,7 @@ namespace Minidump.Decryptor
                 if (position == 0)
                     continue;
 
-                var ptr_entry_loc = get_ptr_with_offset(minidump.fileBinaryReader,
-                    (position + template.first_entry_offset), minidump.sysinfo);
+                var ptr_entry_loc = get_ptr_with_offset(minidump.fileBinaryReader, (position + template.first_entry_offset), minidump.sysinfo);
                 long ptr_entry = ReadInt64(minidump.fileBinaryReader, (long)ptr_entry_loc);
 
                 llcurrent = ptr_entry;
@@ -32,23 +31,21 @@ namespace Minidump.Decryptor
                     dpapi.KIWI_MASTERKEY_CACHE_ENTRY dpapiEntry = ReadStruct<dpapi.KIWI_MASTERKEY_CACHE_ENTRY>(entryBytes);
                     //PrintProperties(dpapiEntry);
 
-                    byte[] dec_masterkey = BCrypt.DecryptCredentials(dpapiEntry.key, minidump.lsakeys);
-                    Dpapi dpapi = new Dpapi();
-                    //dpapi.luid = $"{dpapiEntry.LogonId.HighPart}:{dpapiEntry.LogonId.LowPart}";
-                    dpapi.masterkey = BitConverter.ToString(dec_masterkey).Replace("-", "");
-                    dpapi.insertTime = $"{ToDateTime(dpapiEntry.insertTime):yyyy-MM-dd HH:mm:ss}";
-                    dpapi.key_size = dpapiEntry.keySize.ToString();
-                    dpapi.key_guid = dpapiEntry.KeyUid.ToString();
-                    dpapi.masterkey_sha = BCrypt.GetHashSHA1(dec_masterkey);
-
-                    Logon currentlogon = minidump.logonlist.FirstOrDefault(x => x.LogonId.HighPart == dpapiEntry.LogonId.HighPart && x.LogonId.LowPart == dpapiEntry.LogonId.LowPart);
-
                     if (dpapiEntry.keySize > 1)
                     {
-                        if (currentlogon == null)
+                        byte[] dec_masterkey = BCrypt.DecryptCredentials(dpapiEntry.key, minidump.lsakeys);
+                        Dpapi dpapi = new Dpapi();
+                        //dpapi.luid = $"{dpapiEntry.LogonId.HighPart}:{dpapiEntry.LogonId.LowPart}";
+                        dpapi.masterkey = BitConverter.ToString(dec_masterkey).Replace("-", "");
+                        dpapi.insertTime = $"{ToDateTime(dpapiEntry.insertTime):yyyy-MM-dd HH:mm:ss}";
+                        dpapi.key_size = dpapiEntry.keySize.ToString();
+                        dpapi.key_guid = dpapiEntry.KeyUid.ToString();
+                        dpapi.masterkey_sha = BCrypt.GetHashSHA1(dec_masterkey);
+
+                        Logon currentlogon = minidump.logonlist.FirstOrDefault(x => x.LogonId.HighPart == dpapiEntry.LogonId.HighPart && x.LogonId.LowPart == dpapiEntry.LogonId.LowPart);
+                        if (currentlogon == null && !dpapi.insertTime.Contains("1601-01-01"))
                         {
                             currentlogon = new Logon(dpapiEntry.LogonId);
-                            //currentlogon.UserName = username;
                             currentlogon.Dpapi = new List<Dpapi>();
                             currentlogon.Dpapi.Add(dpapi);
                             minidump.logonlist.Add(currentlogon);

@@ -25,8 +25,8 @@ namespace Minidump.Decryptor
                 minidump.fileBinaryReader.BaseStream.Seek(credmanMem, 0);
                 var credmansetBytes = minidump.fileBinaryReader.ReadBytes(Marshal.SizeOf(template.list_entry));
 
-                int list1offset = StructFieldOffset(typeof(KIWI_CREDMAN_SET_LIST_ENTRY), "list1");//bug
-                long pList1 = BitConverter.ToInt64(credmansetBytes, list1offset);
+                //int list1offset = StructFieldOffset(typeof(KIWI_CREDMAN_SET_LIST_ENTRY), "list1");//bug
+                long pList1 = BitConverter.ToInt64(credmansetBytes, FieldOffset<KIWI_CREDMAN_SET_LIST_ENTRY>("list1"));
                 long refer = pList1 + FieldOffset<KIWI_CREDMAN_LIST_STARTER>("start");
 
                 minidump.fileBinaryReader.BaseStream.Seek(Rva2offset(minidump, pList1), 0);
@@ -41,11 +41,13 @@ namespace Minidump.Decryptor
                     continue;
 
                 llCurrent = pStart;
-                llCurrent = llCurrent - FieldOffset<KIWI_CREDMAN_LIST_ENTRY>("Flink");
+                
 
                 do
                 {
+                    llCurrent = llCurrent - FieldOffset<KIWI_CREDMAN_LIST_ENTRY>("Flink");
                     llCurrent = Rva2offset(minidump, llCurrent);
+
                     if (llCurrent == 0)
                         continue;
 
@@ -94,12 +96,11 @@ namespace Minidump.Decryptor
 
                         if (credmanentry.Password != null)
                         {
-                            var currentlogon = minidump.logonlist.FirstOrDefault(x =>
-                                x.LogonId.HighPart == luid.HighPart && x.LogonId.LowPart == luid.LowPart);
+                            var currentlogon = minidump.logonlist.FirstOrDefault(x => x.LogonId.HighPart == luid.HighPart && x.LogonId.LowPart == luid.LowPart);
                             if (currentlogon == null)
                             {
                                 currentlogon = new Logon(luid);
-                                currentlogon.UserName = username;
+                                //currentlogon.UserName = username;
                                 currentlogon.Credman = new List<CredMan>();
                                 currentlogon.Credman.Add(credmanentry);
                                 minidump.logonlist.Add(currentlogon);

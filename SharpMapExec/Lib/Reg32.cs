@@ -60,9 +60,9 @@ namespace SharpMapExec.Lib
             try
             {
                 RegistryKey environmentKey = RegistryKey.OpenRemoteBaseKey(hive, computername);
-                string value = (string)environmentKey.OpenSubKey(subKeyName).GetValue(keyName);
+                var value = environmentKey.OpenSubKey(subKeyName).GetValue(keyName);
                 environmentKey.Close();
-                return value;
+                return value.ToString();
             }
             catch (System.UnauthorizedAccessException e)
             {
@@ -161,7 +161,7 @@ namespace SharpMapExec.Lib
                 }
 
                 string value = readRegValue(computername, RegistryHive.LocalMachine, key.Value, key.Key);
-                Console.WriteLine("  [*] Current {0} value: {1}", key.Key, value);
+                Console.WriteLine("  [*] {0} value: {1}", key.Key, value);
 
                 if(value == "0")
                 {
@@ -198,7 +198,7 @@ namespace SharpMapExec.Lib
                 }
 
                 string value = readRegValue(computername, RegistryHive.LocalMachine, key.Value, key.Key);
-                Console.WriteLine("  [*] Current {0} value: {1}", key.Key, value);
+                Console.WriteLine("  [*] {0} value: {1}", key.Key, value);
 
             }
         }
