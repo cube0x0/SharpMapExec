@@ -77,7 +77,6 @@
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\kerberosSmb.cs" />
     <Compile Include="Commands\KerberosSpray.cs" />
-    <Compile Include="Commands\kerberosCim.cs" />
     <Compile Include="Commands\kerberosWinrm.cs" />
     <Compile Include="Commands\NtlmReg32.cs" />
     <Compile Include="Commands\NtlmSmb.cs" />
