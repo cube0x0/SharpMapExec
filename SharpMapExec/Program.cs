@@ -6,6 +6,12 @@ namespace SharpMapExec
 {
     internal class Program
     {
+        // TOOD:
+        //  computer list
+        //  more ldap data
+        //  smb null scan
+        //  smb file scan
+
         private static void Main(string[] args)
         {
             if (!Directory.Exists("loot"))

@@ -88,6 +88,7 @@ namespace SharpMapExec.Lib
             connection.SkipRevocationCheck = true;
             connection.SkipCNCheck = true;
             connection.SkipCACheck = true;
+            connection.IdleTimeout = 120 * 1000; //2min timeout
 
             if (auth == "kerberos")
             {
@@ -113,7 +114,7 @@ namespace SharpMapExec.Lib
                     using (var powershell = PowerShell.Create())
                     {
                         powershell.Runspace = runspace;
-                        powershell.AddScript("if(get-module psreadline -all){remove-module psreadline -Force}");
+                        powershell.AddScript("if(get-module psreadline){remove-module psreadline -Force}");
                         if (AmsiBypass)
                         {
                             string amsi = AmsiFail.GetPayload();

@@ -18,8 +18,8 @@ namespace SharpMapExec.Commands
             string path = "";
             string destination = "";
             string[] computernames;
-            var hash = new NTHash();
-            var password = new ClearText();
+            string[] hashes = null;
+            string[] passwords = null;
             string module = "";
             string moduleargument = "";
             List<string> flags = new List<string>();
@@ -95,22 +95,22 @@ namespace SharpMapExec.Commands
             {
                 if (File.Exists(arguments["/password"]))
                 {
-                    password.Cleartext = File.ReadAllLines(arguments["/password"]);
+                    passwords = File.ReadAllLines(arguments["/password"]);
                 }
                 else
                 {
-                    password.Cleartext = arguments["/password"].Split(',');
+                    passwords = arguments["/password"].Split(',');
                 }
             }
             else if (arguments.ContainsKey("/ntlm"))
             {
                 if (File.Exists(arguments["/ntlm"]))
                 {
-                    hash.Nthash = File.ReadAllLines(arguments["/ntlm"]);
+                    hashes = File.ReadAllLines(arguments["/ntlm"]);
                 }
                 else
                 {
-                    hash.Nthash = arguments["/ntlm"].Split(',');
+                    hashes = arguments["/ntlm"].Split(',');
                 }
             }
             else
@@ -148,9 +148,9 @@ namespace SharpMapExec.Commands
                     Scan.CIM(cimSession, module);
                 }
             }
-            else if (password.Cleartext != null)
+            else if (passwords != null)
             {
-                Lib.ntlm.Ntlm(user, domain, password, computernames, module, moduleargument, path, destination, flags, "cim");
+                Lib.ntlm.Ntlm(user, domain, passwords, hashes, computernames, "", module, moduleargument, path, destination, flags, "cim");
             }
             else
             {

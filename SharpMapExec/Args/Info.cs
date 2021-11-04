@@ -57,6 +57,14 @@ namespace SharpMapExec.args
             Console.WriteLine(@"        SharpMapExec.exe kerbspray /users:USERS.TXT /passwords:PASSWORDS.TXT /domain:DOMAIN /dc:DC");
             Console.WriteLine(@"        SharpMapExec.exe tgtdeleg");
 
+            //ldap
+            Console.WriteLine("\r\n    --- Ldap ---");
+            Console.WriteLine(@"        SharpMapExec.exe ntlm ldap /user:USER /password:PASSWORD /domain:DOMAIN /dc:DC /m:MODULE");
+            Console.WriteLine(@"        SharpMapExec.exe kerberos ldap </user:USER /password:PASSWORD /domain:DOMAIN /dc:DC /m:MODULE | /ticket:TICKET.Kirbi>");
+            Console.WriteLine("\n       Ldap modules");
+            Console.WriteLine(@"          /m:spraydata                                (Download user and password policy)");
+
+
             Console.WriteLine("\r\n");
         }
     }

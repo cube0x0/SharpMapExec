@@ -10,23 +10,23 @@ namespace SharpMapExec.Lib
 {
     public class ntlm
     {
-        public static void Ntlm<T>(string[] users, string domain, T secrets, string[] computernames, string module, string moduleargument,string path, string destination, List<string> flags, string protocol)
+        public static void Ntlm(string[] users, string domain, string[] passwords, string[] hashes, string[] computernames, string domainController, string module, string moduleargument,string path, string destination, List<string> flags, string protocol)
         {
-            StartJob(users, domain, secrets, computernames, module, moduleargument, path, destination, flags, protocol);
-            //var listOfTasks = new List<Task>();
-            //listOfTasks.Add(new Task(() => StartJob(users, domain, secrets, computernames, module, moduleargument, path, destination, flags, protocol)));
-            //Tasks.StartAndWaitAllThrottled(listOfTasks, 1);
+            //StartJob(users, domain, passwords, hashes, computernames, module, moduleargument, path, destination, flags, protocol);
+            var listOfTasks = new List<Task>();
+            listOfTasks.Add(new Task(() => StartJob(users, domain, passwords, hashes, computernames, domainController, module, moduleargument, path, destination, flags, protocol)));
+            Tasks.StartAndWaitAllThrottled(listOfTasks, 1);
         }
 
-        public static void StartJob<T>(string[] users, string domain, T secrets, string[] computernames, string module, string moduleargument, string path, string destination, List<string> flags, string protocol)
+        public static void StartJob(string[] users, string domain, string[] passwords, string[] hashes, string[] computernames, string domainController, string module, string moduleargument, string path, string destination, List<string> flags, string protocol)
         {
-            string[] passwords;
-            if (typeof(T) == typeof(NTHash))
+            var secrets = hashes != null ? hashes : passwords;
+ 
+            if (hashes != null)
             {
-                passwords = (string[])secrets.GetType().GetProperties().Single(pi => pi.Name == "Nthash").GetValue(secrets, null);
                 foreach (string user in users)
                 {
-                    foreach (string password in passwords)
+                    foreach (string password in secrets)
                     {
                         Console.WriteLine("------------------");
                         Console.WriteLine(string.Format("[*] User:   {0}", user));
@@ -46,15 +46,18 @@ namespace SharpMapExec.Lib
                         {
                             Scan.REG32(computernames, module);
                         }
+                        else if (protocol.ToLower() == "domain")
+                        {
+                            Scan.LDAP(module, domain, domainController);
+                        }
                     }
                 }
             }
-            else if (typeof(T) == typeof(ClearText))
+            else
             {
-                passwords = (string[])secrets.GetType().GetProperties().Single(pi => pi.Name == "Cleartext").GetValue(secrets, null);
                 foreach (string user in users)
                 {
-                    foreach (string password in passwords)
+                    foreach (string password in secrets)
                     {
                         Console.WriteLine("------------------");
                         Console.WriteLine(string.Format("[*] User:   {0}", user));
@@ -83,6 +86,10 @@ namespace SharpMapExec.Lib
                             else if (protocol.ToLower() == "reg32")
                             {
                                 Scan.REG32(computernames, module);
+                            }
+                            else if (protocol.ToLower() == "domain")
+                            {
+                                Scan.LDAP(module, domain, domainController);
                             }
                         }
                     }

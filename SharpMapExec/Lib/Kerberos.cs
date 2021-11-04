@@ -21,13 +21,12 @@ namespace SharpMapExec.Lib
         {
             AToken.MakeToken("Fake", "Fake", "Fake");
             Console.WriteLine("------------------");
-            string ticketoutput;
             
             if (String.IsNullOrEmpty(ticket))
             {
+                var secrets = hashes.Length > 0 ? hashes : passwords;
                 foreach (string user in users)
                 {
-                    var secrets = hashes.Length > 0 ? hashes : passwords;
                     foreach (string secret in secrets)
                     {
                         string hash;
@@ -43,7 +42,7 @@ namespace SharpMapExec.Lib
                         Console.WriteLine(string.Format("[*] User:   {0}", user));
                         Console.WriteLine(string.Format("[*] Domain: {0}", domain));
                         Console.WriteLine(string.Format("[*] Secret: {0}", secret));
-                        ticketoutput = SecurityContext.AskTicket(user, domain, hash, encType, dc);
+                        string ticketoutput = SecurityContext.AskTicket(user, domain, hash, encType, dc);
                         if (ticketoutput.Contains("[+] Ticket successfully imported!"))
                             Console.WriteLine("[+] Ticket successfully imported!");
                         else
@@ -57,13 +56,15 @@ namespace SharpMapExec.Lib
                             Scan.WINRM(computernames, module, moduleargument, path, destination, flags);
                         else if (protocol.ToLower() == "reg32")
                             Scan.REG32(computernames, module);
+                        else if (protocol.ToLower() == "ldap")
+                            Scan.LDAP(module, domain, dc);
                     }
                 }
             }
             else
             {
                 Console.WriteLine(string.Format("[*] Ticket: {0}", ticket));
-                ticketoutput = SecurityContext.ImportTicket(ticket);
+                string ticketoutput = SecurityContext.ImportTicket(ticket);
                 if (ticketoutput.Contains("[+] Ticket successfully imported!"))
                     Console.WriteLine("[+] TGT imported successfully!");
                 else
@@ -77,6 +78,8 @@ namespace SharpMapExec.Lib
                     Scan.WINRM(computernames, module, moduleargument, path, destination, flags);
                 else if (protocol.ToLower() == "reg32")
                     Scan.REG32(computernames, module);
+                else if (protocol.ToLower() == "ldap")
+                    Scan.LDAP(module, domain, dc);
             }
 
             AToken.RevertFromToken();

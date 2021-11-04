@@ -5,9 +5,9 @@ using static SharpMapExec.Helpers.SecurityContext;
 
 namespace SharpMapExec.Commands
 {
-    public class NtlmSmb : ICommand
+    public class NtlmLdap : ICommand
     {
-        public static string CommandName => "ntlmsmb";
+        public static string CommandName => "ntlmldap";
 
         public void Execute(Dictionary<string, string> arguments)
         {
@@ -15,20 +15,42 @@ namespace SharpMapExec.Commands
             string domain = "";
             string path = "";
             string destination = "";
-            string[] computernames;
+            string domainController = "";
+            string[] computernames = null;
             string[] hashes = null;
             string[] passwords = null;
             string module = "";
             string moduleargument = "";
             List<string> flags = new List<string>();
 
+            if (arguments.ContainsKey("/d"))
+            {
+                destination = arguments["/d"];
+            }
+            if (arguments.ContainsKey("/destination"))
+            {
+                destination = arguments["/destination"];
+            }
+            if (arguments.ContainsKey("/p"))
+            {
+                path = arguments["/p"];
+            }
+            if (arguments.ContainsKey("/path"))
+            {
+                path = arguments["/path"];
+            }
             if (arguments.ContainsKey("/m"))
             {
                 module = arguments["/m"];
             }
-            if (arguments.ContainsKey("/module"))
+            else if (arguments.ContainsKey("/module"))
             {
                 module = arguments["/module"];
+            }
+            else
+            {
+                Console.WriteLine("[-] /m or /module must be supplied");
+                return;
             }
             if (arguments.ContainsKey("/a"))
             {
@@ -47,7 +69,17 @@ namespace SharpMapExec.Commands
             }
             else
             {
-                domain = ".";
+                Console.WriteLine("[-] /domain must be supplied");
+                return;
+            }
+
+            if (arguments.ContainsKey("/dc"))
+            {
+                domainController = arguments["/dc"];
+            }
+            else if (arguments.ContainsKey("/domaincontroller"))
+            {
+                domainController = arguments["/domaincontroller"];
             }
 
             if (arguments.ContainsKey("/user"))
@@ -76,22 +108,6 @@ namespace SharpMapExec.Commands
                 return;
             }
 
-            if (arguments.ContainsKey("/computername"))
-            {
-                if (File.Exists(arguments["/computername"]))
-                {
-                    computernames = File.ReadAllLines(arguments["/computername"]);
-                }
-                else
-                {
-                    computernames = arguments["/computername"].Split(',');
-                }
-            }
-            else
-            {
-                Console.WriteLine("[-] /computername must be supplied!");
-                return;
-            }
 
             if (arguments.ContainsKey("/password"))
             {
@@ -120,7 +136,9 @@ namespace SharpMapExec.Commands
                 Console.WriteLine("[-] /password or /ntlm must be supplied");
                 return;
             }
-            Lib.ntlm.Ntlm(user, domain, passwords, hashes, computernames, "", module, moduleargument, path, destination, flags, "smb");
+
+
+            Lib.ntlm.Ntlm(user, domain, passwords, hashes, computernames, domainController, module, moduleargument, path, destination, flags, "domain");
         }
     }
 }

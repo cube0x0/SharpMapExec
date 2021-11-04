@@ -21,10 +21,6 @@ namespace SharpMapExec.Lib
                         Console.WriteLine();
                         continue;
                     }
-                    if (!Directory.Exists(Path.Combine("loot", computername)))
-                    {
-                        Directory.CreateDirectory(Path.Combine("loot", computername));
-                    }
                     Smb.CheckSMBVersion(computername);
                     Smb.CheckOsVersion(computername);
                     Smb.CheckLocalAdmin(computername, module);
@@ -34,6 +30,34 @@ namespace SharpMapExec.Lib
                 {
                     Console.WriteLine("[-] {0}:445 - {1}", computername, e.ToString());
                 }
+            }
+        }
+
+        public static void LDAP(string module, string domain, string domainController = "")
+        {
+            try
+            {
+                Console.WriteLine(String.Format("[*] Checking {0}", domain));
+                if (!Misc.CheckHostPort(domain, 389))
+                {
+                    Console.WriteLine(String.Format("[-] Could Not Reach {0}:389", domain));
+                    Console.WriteLine();
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(domainController))
+                    domainController = Domain.FindDomainController(domain);
+
+                if (module.Contains("spraydata") || module.Contains("spraylist") || module.Contains("spray"))
+                {   
+                    Domain.GetUsers(domain, domainController);
+                }
+                
+                Console.WriteLine("");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[-] {0}:389 - {1}", domain, e.ToString());
             }
         }
 
