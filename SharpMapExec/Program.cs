@@ -9,7 +9,7 @@ namespace SharpMapExec
         // TOOD:
         //  computer list
         //  more ldap data
-        //  smb null scan
+        //  smb null scan 
         //  smb file scan
 
         private static void Main(string[] args)
